@@ -91,7 +91,7 @@ def repair_material(material, textures: list[Path], source_dir: Path) -> None:
         separate = nodes.new("ShaderNodeSeparateColor")
         separate.mode = "RGB"
         links.new(node.outputs["Color"], separate.inputs["Color"])
-        # Stein's v1.1 devlog specifies R=roughness, G=metallic, B=AO.
+        # Stein v1.1: R = roughness, G = metallic, B = AO.
         links.new(separate.outputs["Red"], bsdf.inputs["Roughness"])
         links.new(separate.outputs["Green"], bsdf.inputs["Metallic"])
     else:
@@ -148,7 +148,8 @@ def main() -> None:
     target_length = 0.40 if kind == "pistol" else 1.25
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.fbx(filepath=str(source), automatic_bone_orientation=True)
+    # Keep this import call conservative so it works across Blender 4.x/5.x.
+    bpy.ops.import_scene.fbx(filepath=str(source))
     imported = list(bpy.context.scene.objects)
     meshes = [obj for obj in imported if obj.type == "MESH"]
     if not meshes:
@@ -159,7 +160,6 @@ def main() -> None:
     for material in bpy.data.materials:
         repair_material(material, pngs, source.parent)
 
-    # Parent every original top-level object beneath a stable export root.
     root = bpy.data.objects.new("SteinWeapon", None)
     bpy.context.scene.collection.objects.link(root)
     for obj in imported:
@@ -171,11 +171,6 @@ def main() -> None:
     longest = max((maximum - minimum).x, (maximum - minimum).y, (maximum - minimum).z)
     scale = target_length / max(longest, 1e-6)
 
-    # Stein targets an Unreal-style +X-forward workflow. Rotate +X onto Blender
-    # +Y (which glTF/Godot presents along -Z), then translate *after* applying
-    # the rotation/scale math so the weapon remains centered. The previous
-    # implementation used -center directly and could throw centimetre-unit FBX
-    # meshes far away from the camera after normalization.
     root.rotation_euler.z = math.radians(90.0)
     root.scale = (scale, scale, scale)
     root.location = Vector((center.y * scale, -center.x * scale, -center.z * scale))
