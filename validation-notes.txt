@@ -1,0 +1,8 @@
+DUSTLINE validation
+- TypeScript typecheck passed.
+- Production build passed.
+- Node gameplay checks: 5 passed (collision/crouch, bot routing, reload conservation, cover/headshot raycasts, armor/death/spawn protection).
+- Local initial route returned HTTP 200.
+- GLB header and animation clips validated: Idle, Run, TPose, Walk.
+- Browser UI QA was not performed. The user requested no automatic page opening.
+- WebMCP helpers are feature-detected; no supported WebMCP validation context was available. WebMCP contract remains unverified.

@@ -1,0 +1,116 @@
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-09-01 00:24:57)
+[ALSOFT] (EE) Failed to connect PipeWire event context (errno: 1)
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+13:28:58 | INFO: Data are loaded, start creating Blender stuff
+13:28:58 | INFO: Blender create Mesh node rifle_Cone_016
+13:28:58 | INFO: Blender create Mesh node rifle_Curled support finger
+13:28:58 | INFO: Blender create Mesh node 2
+13:28:58 | INFO: Blender create Mesh node 3
+13:28:58 | INFO: Blender create Mesh node 4
+13:28:58 | INFO: Blender create Mesh node 5
+13:28:58 | INFO: Blender create Mesh node 6
+13:28:58 | INFO: Blender create Mesh node 7
+13:28:58 | INFO: Blender create Mesh node 8
+13:28:58 | INFO: Blender create Mesh node 9
+13:28:58 | INFO: Blender create Mesh node 10
+13:28:58 | INFO: Blender create Mesh node 11
+13:28:58 | INFO: Blender create Mesh node 12
+13:28:58 | INFO: Blender create Mesh node 13
+13:28:58 | INFO: Blender create Mesh node 14
+13:28:58 | INFO: Blender create Mesh node 15
+13:28:58 | INFO: Blender create Mesh node 16
+13:28:58 | INFO: Blender create Mesh node 17
+13:28:58 | INFO: Blender create Mesh node 18
+13:28:58 | INFO: Blender create Mesh node 19
+13:28:58 | INFO: Blender create Mesh node 20
+13:28:58 | INFO: Blender create Mesh node 21
+13:28:58 | INFO: Blender create Mesh node 22
+13:28:58 | INFO: Blender create Mesh node 23
+13:28:58 | INFO: Blender create Mesh node 24
+13:28:58 | INFO: Blender create Mesh node 25
+13:28:58 | INFO: Blender create Mesh node 26
+13:28:58 | INFO: Blender create Mesh node 27
+13:28:58 | INFO: Blender create Mesh node 28
+13:28:58 | INFO: Blender create Mesh node 29
+13:28:58 | INFO: Blender create Mesh node 30
+13:28:58 | INFO: Blender create Mesh node 31
+13:28:58 | INFO: Blender create Mesh node 32
+13:28:58 | INFO: Blender create Mesh node 33
+13:28:58 | INFO: Blender create Mesh node 34
+13:28:58 | INFO: Blender create Mesh node 35
+13:28:58 | INFO: Blender create Mesh node 36
+13:28:58 | INFO: Blender create Mesh node 37
+13:28:58 | INFO: Blender create Mesh node 38
+13:28:58 | INFO: Blender create Mesh node 39
+13:28:58 | INFO: Blender create Mesh node 40
+13:28:58 | INFO: Blender create Mesh node 41
+13:28:58 | INFO: Blender create Mesh node 42
+13:28:58 | INFO: Blender create Mesh node 43
+13:28:58 | INFO: Blender create Mesh node 44
+13:28:58 | INFO: Blender create Mesh node 45
+13:28:58 | INFO: Blender create Mesh node 46
+13:28:58 | INFO: Blender create Mesh node 47
+13:28:58 | INFO: Blender create Mesh node 48
+13:28:58 | INFO: Blender create Mesh node 49
+13:28:58 | INFO: Blender create Mesh node 50
+13:28:58 | INFO: Blender create Mesh node 51
+13:28:58 | INFO: Blender create Mesh node 52
+13:28:58 | INFO: Blender create Mesh node 53
+13:28:58 | INFO: Blender create Mesh node 54
+13:28:58 | INFO: glTF import finished in 0.05s
+00:00.916  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_b90ef2c4857397c2d0da49fbb6d148bb.png.png"
+Info: Saved as "m4a1.blend"
+INFO Draco is available, use library at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_meshopt_bridge.so
+13:28:58 | INFO: Starting glTF 2.0 export
+13:28:58 | INFO: Extracting primitive: Mesh_2
+13:28:58 | INFO: Primitives created: 2
+13:28:58 | INFO: Extracting primitive: rifle_Cone_016
+13:28:59 | INFO: Primitives created: 4
+13:28:59 | INFO: Extracting primitive: Mesh_8
+13:28:59 | INFO: Primitives created: 3
+13:28:59 | INFO: Extracting primitive: rifle_Curled support finger
+13:28:59 | INFO: Primitives created: 4
+13:28:59 | INFO: Finished glTF 2.0 export in 0.07505369186401367 s
+
+FINISHED m4a1
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+13:28:59 | INFO: Data are loaded, start creating Blender stuff
+13:28:59 | INFO: Blender create Mesh node rifle_Cone_016
+13:28:59 | INFO: Blender create Mesh node rifle_Curled support finger
+13:28:59 | INFO: Blender create Mesh node 2
+13:28:59 | INFO: Blender create Mesh node 3
+13:28:59 | INFO: Blender create Mesh node 4
+13:28:59 | INFO: Blender create Mesh node 5
+13:28:59 | INFO: Blender create Mesh node 6
+13:28:59 | INFO: Blender create Mesh node 7
+13:28:59 | INFO: Blender create Mesh node 8
+13:28:59 | INFO: Blender create Mesh node 9
+13:28:59 | INFO: Blender create Mesh node 10
+13:28:59 | INFO: Blender create Mesh node 11
+13:28:59 | INFO: Blender create Mesh node 12
+13:28:59 | INFO: Blender create Mesh node 13
+13:28:59 | INFO: Blender create Mesh node 14
+13:28:59 | INFO: Blender create Mesh node 15
+13:28:59 | INFO: Blender create Mesh node 16
+13:28:59 | INFO: Blender create Mesh node 17
+13:28:59 | INFO: Blender create Mesh node 18
+13:28:59 | INFO: glTF import finished in 0.03s
+00:01.157  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_44dec52b4ef661e4f82c54cd3289f116.png.png"
+Warning: No mesh data to join
+Info: Saved as "awp.blend"
+13:28:59 | INFO: Starting glTF 2.0 export
+13:28:59 | INFO: Extracting primitive: Mesh_15
+13:28:59 | INFO: Primitives created: 2
+13:28:59 | INFO: Extracting primitive: Mesh_2
+13:28:59 | INFO: Primitives created: 1
+13:28:59 | INFO: Extracting primitive: rifle_Cone_016
+13:28:59 | INFO: Primitives created: 4
+13:28:59 | INFO: Extracting primitive: Mesh_3
+13:28:59 | INFO: Primitives created: 5
+13:28:59 | INFO: Extracting primitive: rifle_Curled support finger
+13:28:59 | INFO: Primitives created: 4
+13:28:59 | INFO: Finished glTF 2.0 export in 0.03453969955444336 s
+
+FINISHED awp
+pa_write() failed while trying to wake up the mainloop: Operation not permitted

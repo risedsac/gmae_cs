@@ -1,0 +1,55 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS player capsule rests on ground
+PASS valid spawn (0.0, 0.0, 23.0)
+PASS valid spawn (11.0, 0.0, 23.0)
+PASS valid spawn (-10.0, 0.0, 17.0)
+PASS valid spawn (1.0, 0.0, -11.0)
+PASS valid spawn (11.0, 0.0, 2.0)
+PASS valid spawn (-1.0, 0.0, 5.0)
+PASS valid spawn (5.0, 0.0, -26.0)
+PASS valid spawn (3.0, 0.0, -27.0)
+PASS valid spawn (1.0, 0.0, 11.0)
+PASS valid spawn (14.0, 0.0, -2.0)
+PASS navigation connects spawn to far lane through arch
+PASS navigation finds route around buildings
+PASS arch opening allows sight
+PASS arch masonry blocks bullets
+PASS building blocks sight
+PASS W moves forward with physical velocity
+PASS player cannot walk through a building
+PASS jump leaves the floor
+PASS jump lands without falling through ground
+PASS crouch changes actual collider
+PASS standing restores collider
+PASS reload respects reserve and magazine capacity
+PASS quick shot then reload is preserved
+PASS weapon switch cancels reload
+PASS pistol remains semi automatic when held
+PASS spawn protection prevents damage
+PASS armor absorbs a bounded share of damage
+PASS pause freezes gameplay and reload timers
+PASS bot detects an unobstructed player in field of view
+PASS bot cannot see through the back of its head
+PASS bot cannot detect player through masonry
+PASS sound memory does not track unseen player position
+PASS enemy burst consumes ammunition
+PASS enemy muzzle ray blocks shots through walls
+PASS lethal damage enters respawn countdown
+PASS player respawns with protection
+PASS death only scores once and releases collision
+PASS bot 0 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS bot 1 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS bot 2 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS bot 3 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS player hitscan deals rifle body damage through native physics
+PASS player bullet cannot penetrate building
+PASS live AI engages player with bursts (47 shots)
+PASS live enemy rays can defeat and respawn the player
+PASS live AI reaches cover and peeks during combat
+PASS live AI reloads after consuming magazine
+REGRESSION_RESULT 52 passed / 0 failed; patrol distance 536.218702805229

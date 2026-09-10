@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+   at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:372)
+OpenGL API 4.6 (Core Profile) Mesa 26.2.2-arch3.2 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 22.1.8, 256 bits)
+
+Movie Maker mode enabled, recording movie in 1280×800 @ 30 FPS...

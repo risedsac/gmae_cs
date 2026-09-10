@@ -1,0 +1,131 @@
+00:00.296  blend            | Read blend: "/home/wzt/Documents/Codex/2026-09-07/zuo/work/dustline-native/models/revision3/sources/fps-arms.blend"
+00:00.300  blend.doversion  | WARNING Region type 4 missing in space type "Info" (id: 7) - removing region
+POSE_JOINTS R [('hand.R', (0.06400003284215927, 0.21500001847743988, -0.17999999225139618)), ('f_index.01.R', (0.06495137512683868, 0.3093300461769104, -0.14786627888679504)), ('f_middle.01.R', (0.06400001794099808, 0.3103950023651123, -0.17236840724945068)), ('thumb.01.R', (0.06500652432441711, 0.24880798161029816, -0.1540248990058899)), ('thumb.02.R', (0.04096347466111183, 0.258863240480423, -0.13964468240737915)), ('thumb.03.R', (0.006144661922007799, 0.2635146975517273, -0.13299253582954407))]
+POSE_JOINTS L [('hand.L', (-0.0920000746846199, 0.8600000143051147, -0.11500004678964615)), ('f_index.01.L', (-0.07863754034042358, 0.8412648439407349, -0.01803576387465)), ('f_middle.01.L', (-0.0778287872672081, 0.8656686544418335, -0.020525244995951653)), ('thumb.01.L', (-0.08769826591014862, 0.8389729857444763, -0.07814813405275345)), ('thumb.02.L', (-0.06220674514770508, 0.8265758752822876, -0.06906743347644806)), ('thumb.03.L', (-0.02680949680507183, 0.82252037525177, -0.06609687209129333))]
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+19:06:22 | INFO: Data are loaded, start creating Blender stuff
+19:06:22 | INFO: Blender create Mesh node Cube.020
+19:06:22 | INFO: Blender create Mesh node Cone.002
+19:06:22 | INFO: Blender create Mesh node Curved magazine
+19:06:22 | INFO: Blender create Mesh node Hand topology.002
+19:06:22 | INFO: Blender create Mesh node Sleeve R.001
+19:06:22 | INFO: Blender create Mesh node Hand topology.003
+19:06:22 | INFO: Blender create Mesh node Sleeve L.001
+19:06:22 | INFO: glTF import finished in 0.07s
+/home/wzt/Documents/Codex/2026-09-07/zuo/work/dustline-native/models/revision3/build_hands.py:15: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m=bpy.data.materials.new(name);m.diffuse_color=(*color,1);m.use_nodes=True
+00:00.743  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_5d8db2d485d86d6a65e6a75afca3af48.png.png"
+Info: Saved as "rifle-hands.blend"
+INFO Draco is available, use library at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_meshopt_bridge.so
+19:06:22 | INFO: Starting glTF 2.0 export
+19:06:22 | INFO: Extracting primitive: Cube.020
+19:06:22 | INFO: Primitives created: 2
+19:06:22 | INFO: Extracting primitive: Cone.002
+19:06:22 | INFO: Primitives created: 5
+19:06:22 | INFO: Extracting primitive: Curved magazine
+19:06:22 | INFO: Primitives created: 2
+19:06:22 | INFO: Extracting primitive: Hand topology
+19:06:22 | INFO: Primitives created: 1
+19:06:22 | INFO: Extracting primitive: Sleeve R
+19:06:22 | INFO: Primitives created: 1
+19:06:22 | INFO: Extracting primitive: Hand topology.001
+19:06:22 | INFO: Primitives created: 1
+19:06:22 | INFO: Extracting primitive: Sleeve L
+19:06:22 | INFO: Primitives created: 1
+19:06:22 | INFO: Finished glTF 2.0 export in 0.057427167892456055 s
+
+ANATOMICAL_HANDS rifle
+00:00.810  blend            | Read blend: "/home/wzt/Documents/Codex/2026-09-07/zuo/work/dustline-native/models/revision3/sources/fps-arms.blend"
+00:00.814  blend.doversion  | WARNING Region type 4 missing in space type "Info" (id: 7) - removing region
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+19:06:22 | INFO: Data are loaded, start creating Blender stuff
+19:06:22 | INFO: Blender create Mesh node Cube.023
+19:06:23 | INFO: Blender create Mesh node Cone.020
+19:06:23 | INFO: Blender create Mesh node Cube.041
+19:06:23 | INFO: Blender create Mesh node Hand topology.002
+19:06:23 | INFO: Blender create Mesh node Sleeve R.001
+19:06:23 | INFO: Blender create Mesh node Hand topology.003
+19:06:23 | INFO: Blender create Mesh node Sleeve L.001
+19:06:23 | INFO: glTF import finished in 0.06s
+00:01.179  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_8aedcc307afd9628f0666c9cae726ddc.png.png"
+Info: Saved as "sidearm-hands.blend"
+19:06:23 | INFO: Starting glTF 2.0 export
+19:06:23 | INFO: Extracting primitive: Cube.023
+19:06:23 | INFO: Primitives created: 3
+19:06:23 | INFO: Extracting primitive: Cone.020
+19:06:23 | INFO: Primitives created: 4
+19:06:23 | INFO: Extracting primitive: Cube.041
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Hand topology
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Sleeve R
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Hand topology.001
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Sleeve L
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Finished glTF 2.0 export in 0.0493464469909668 s
+
+ANATOMICAL_HANDS sidearm
+00:01.230  blend            | Read blend: "/home/wzt/Documents/Codex/2026-09-07/zuo/work/dustline-native/models/revision3/sources/fps-arms.blend"
+00:01.234  blend.doversion  | WARNING Region type 4 missing in space type "Info" (id: 7) - removing region
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+19:06:23 | INFO: Data are loaded, start creating Blender stuff
+19:06:23 | INFO: Blender create Mesh node Mesh_2
+19:06:23 | INFO: Blender create Mesh node Hand topology.002
+19:06:23 | INFO: Blender create Mesh node Sleeve R.001
+19:06:23 | INFO: Blender create Mesh node Mesh_8
+19:06:23 | INFO: Blender create Mesh node Hand topology.003
+19:06:23 | INFO: Blender create Mesh node Sleeve L.001
+19:06:23 | INFO: glTF import finished in 0.05s
+00:01.578  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_f67b5ca2ddcc5d0b3833db965fe91b04.png.png"
+Info: Saved as "m4a1-hands.blend"
+19:06:23 | INFO: Starting glTF 2.0 export
+19:06:23 | INFO: Extracting primitive: Mesh_2
+19:06:23 | INFO: Primitives created: 2
+19:06:23 | INFO: Extracting primitive: Hand topology
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Sleeve R
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Mesh_8
+19:06:23 | INFO: Primitives created: 3
+19:06:23 | INFO: Extracting primitive: Hand topology.001
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Extracting primitive: Sleeve L
+19:06:23 | INFO: Primitives created: 1
+19:06:23 | INFO: Finished glTF 2.0 export in 0.055527687072753906 s
+
+ANATOMICAL_HANDS m4a1
+00:01.635  blend            | Read blend: "/home/wzt/Documents/Codex/2026-09-07/zuo/work/dustline-native/models/revision3/sources/fps-arms.blend"
+00:01.639  blend.doversion  | WARNING Region type 4 missing in space type "Info" (id: 7) - removing region
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+19:06:23 | INFO: Data are loaded, start creating Blender stuff
+19:06:23 | INFO: Blender create Mesh node Mesh_15
+19:06:23 | INFO: Blender create Mesh node Mesh_2
+19:06:23 | INFO: Blender create Mesh node Hand topology.002
+19:06:23 | INFO: Blender create Mesh node Sleeve R.001
+19:06:23 | INFO: Blender create Mesh node Mesh_3
+19:06:23 | INFO: Blender create Mesh node Hand topology.003
+19:06:23 | INFO: Blender create Mesh node Sleeve L.001
+19:06:23 | INFO: glTF import finished in 0.05s
+00:01.996  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_008664c2da670dd038e912ce393b2f16.png.png"
+Info: Saved as "awp-hands.blend"
+19:06:24 | INFO: Starting glTF 2.0 export
+19:06:24 | INFO: Extracting primitive: Mesh_15
+19:06:24 | INFO: Primitives created: 2
+19:06:24 | INFO: Extracting primitive: Mesh_2
+19:06:24 | INFO: Primitives created: 1
+19:06:24 | INFO: Extracting primitive: Hand topology
+19:06:24 | INFO: Primitives created: 1
+19:06:24 | INFO: Extracting primitive: Sleeve R
+19:06:24 | INFO: Primitives created: 1
+19:06:24 | INFO: Extracting primitive: Mesh_3
+19:06:24 | INFO: Primitives created: 5
+19:06:24 | INFO: Extracting primitive: Hand topology.001
+19:06:24 | INFO: Primitives created: 1
+19:06:24 | INFO: Extracting primitive: Sleeve L
+19:06:24 | INFO: Primitives created: 1
+19:06:24 | INFO: Finished glTF 2.0 export in 0.04041910171508789 s
+
+ANATOMICAL_HANDS awp

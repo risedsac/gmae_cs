@@ -1,0 +1,82 @@
+[
+  {
+    "url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip",
+    "file": "work/downloads/Godot_v4.7.2-stable_linux.x86_64.zip",
+    "checksum": "sha256:cadd3204e728a35d3f13adb7fd0d7902636b79f6b95c40c265eb73b6c35329e4"
+  },
+  {
+    "url": "https://github.com/godotengine/godot-builds/releases/download/4.7.2-stable/SHA512-SUMS.txt",
+    "file": "work/downloads/SHA512-SUMS.txt",
+    "checksum": "sha256:b8bdff6704f833e7a021df16ec08e1478edd5a285c1f894929b91a7f74a5c7c0"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_diff_2k.jpg",
+    "file": "work/dustline-native/assets/materials/beige_wall_001_albedo.jpg",
+    "checksum": "md5:c927ac1136767f1df758ae064f50a2d1"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_nor_gl_2k.jpg",
+    "file": "work/dustline-native/assets/materials/beige_wall_001_normal.jpg",
+    "checksum": "md5:127b2f5f2f8c2e57b1f08b263c0690bd"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/beige_wall_001/beige_wall_001_rough_2k.jpg",
+    "file": "work/dustline-native/assets/materials/beige_wall_001_roughness.jpg",
+    "checksum": "md5:6c2a7eb786d436459c231e9d230fb3cc"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandy_gravel_02/sandy_gravel_02_diff_2k.jpg",
+    "file": "work/dustline-native/assets/materials/sandy_gravel_02_albedo.jpg",
+    "checksum": "md5:0ae7373189752d85642f589c12093ec2"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandy_gravel_02/sandy_gravel_02_nor_gl_2k.jpg",
+    "file": "work/dustline-native/assets/materials/sandy_gravel_02_normal.jpg",
+    "checksum": "md5:795860c61dd2ae8fb06c90f7cf2a7e39"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/sandy_gravel_02/sandy_gravel_02_rough_2k.jpg",
+    "file": "work/dustline-native/assets/materials/sandy_gravel_02_roughness.jpg",
+    "checksum": "md5:753a7d079971702788c0b2501de65b1a"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/2k/wooden_crate_02/wooden_crate_02_2k.gltf",
+    "file": "work/dustline-native/assets/crate/wooden_crate_02.gltf",
+    "checksum": "md5:4f403fad26973a4c59f8f0f76df882e8"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/wooden_crate_02/wooden_crate_02_nor_gl_2k.jpg",
+    "file": "work/dustline-native/assets/crate/textures/wooden_crate_02_nor_gl_2k.jpg",
+    "checksum": "md5:c3ea9a69401a666d7410cfc8173414f3"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/wooden_crate_02/wooden_crate_02_arm_2k.jpg",
+    "file": "work/dustline-native/assets/crate/textures/wooden_crate_02_arm_2k.jpg",
+    "checksum": "md5:204ec1fd40b1d2f0662c1ffafa8a2a43"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/2k/wooden_crate_02/wooden_crate_02_diff_2k.jpg",
+    "file": "work/dustline-native/assets/crate/textures/wooden_crate_02_diff_2k.jpg",
+    "checksum": "md5:7a33065ca4727aec5b6d0c01434159f5"
+  },
+  {
+    "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/wooden_crate_02/wooden_crate_02.bin",
+    "file": "work/dustline-native/assets/crate/wooden_crate_02.bin",
+    "checksum": "md5:08d98507231cdeda1070d1a2d0646254"
+  },
+  {
+    "url": "https://opengameart.org/sites/default/files/assaultriflereload1_0.wav",
+    "file": "work/dustline-native/assets/audio/rifle_reload.wav",
+    "checksum": null
+  },
+  {
+    "url": "https://opengameart.org/sites/default/files/gunreload1.wav",
+    "file": "work/dustline-native/assets/audio/pistol_reload.wav",
+    "checksum": null
+  },
+  {
+    "url": "https://opengameart.org/sites/default/files/Prepared%20SFX%20Library.7z",
+    "file": "work/downloads/firearm_sounds.7z",
+    "checksum": null
+  }
+]

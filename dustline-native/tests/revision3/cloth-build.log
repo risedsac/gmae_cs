@@ -1,0 +1,14 @@
+Extensions: writing cache failed ([Errno 30] Read-only file system: '/home/wzt/.config/blender/5.2/extensions').
+18:53:44 | INFO: Data are loaded, start creating Blender stuff
+18:53:44 | INFO: Blender create Mesh node Sphere
+18:53:45 | INFO: glTF import finished in 0.17s
+00:00.621  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/wzt/.cache/thumbnails/large/blender_4_fa99dbcf2e2153f1bddf01041d31069b.png.png"
+Info: Saved as "operator-skinned.blend"
+INFO Draco is available, use library at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_meshopt_bridge.so
+18:53:45 | INFO: Starting glTF 2.0 export
+18:53:45 | INFO: Extracting primitive: Sphere
+18:53:45 | INFO: Primitives created: 13
+18:53:45 | INFO: Finished glTF 2.0 export in 0.6883482933044434 s
+
+CLOTH_WEIGHT_BLENDS 708

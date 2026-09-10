@@ -1,0 +1,38 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS corridor smoothing cannot cross a building
+PASS open lane allows navigation lookahead
+PASS retake assigns exactly one AI directly to bomb
+PASS retake teammates have separated cover destinations
+PASS nearby idle human does not prevent teammate defusing
+PASS human holding E can take over the defuse
+PASS AI yields the interaction to the human
+PASS shot vCAPTURE_COMBAT_SHOTS 0 / 0
+MOTION_CAPTURE_COMPLETE
+riant does not repeat consecutively 1
+PASS shot variant does not repeat consecutively 2
+PASS shot variant does not repeat consecutively 3
+PASS shot variant does not repeat consecutively 4
+PASS shot variant does not repeat consecutively 5
+PASS shot variant does not repeat consecutively 6
+PASS shot variant does not repeat consecutively 7
+PASS shot variant does not repeat consecutively 8
+PASS shot variant does not repeat consecutively 9
+PASS shot variant does not repeat consecutively 10
+PASS shot variant does not repeat consecutively 11
+PASS shot variant does not repeat consecutively 12
+PASS shot variant does not repeat consecutively 13
+PASS shot variant does not repeat consecutively 14
+PASS shot variant does not repeat consecutively 15
+PASS shot variant does not repeat consecutively 16
+PASS shot variant does not repeat consecutively 17
+PASS shot variant does not repeat consecutively 18
+PASS shot variant does not repeat consecutively 19
+PASS all four recorded near shot variants are used
+PASS trial 0 produces sustained actual AI combat (79 shots)
+PASS trial 0 moving sideways under forward animation <4% (0.03%)
+PASS trial 0 no prolonged obstacle stall (max 0.03s)
+PASS trial 1 produces sustained actual AI combat (70 shots)
+PASS trial 1 moving sideways under forward animation <4% (0.04%)
+PASS trial 1 no prolonged obstacle stall (max 0.03s)
+AI_QUALITY_RESULT failures=0

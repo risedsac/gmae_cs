@@ -1,0 +1,9 @@
+DUSTLINE repair verification, 2026-09-08
+Source commit: 98e2b2d6f9f597c6a0b86c4daff1e3059a24fd00
+11 automated gameplay regressions passed, including actual Soldier.glb animation scale, pointer-lock rejection, fast click buffering, 20 FPS time accounting, reload cancellation and actor collision.
+TypeScript typecheck and production build passed.
+Hidden browser visual and interaction checks at 1280x720: correct human-sized actors, forward-facing armed bots, first-person weapon framing, texture scale; start in ready state, drag fallback, movement key, rifle shot 30->29, pistol switch/shot, reload 29/90->30/89, pause retaining remaining time, restart returning 2:00 and 100 health with 30/90 rifle.
+Browser error log empty after checks.
+WebMCP: read status and pause action valid calls verified; invalid read input and paused-state pause failure rejected without mutation.
+Pointer-lock success on a native desktop browser was not available in the hidden test surface; the unsupported-lock fallback was verified.
+User-facing automatic opening remained disabled.

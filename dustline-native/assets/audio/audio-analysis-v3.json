@@ -1,0 +1,290 @@
+[
+  {
+    "name": "rifle_shot_0",
+    "source": "AK-47/C_28P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.6111,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_1",
+    "source": "AK-47/C_28P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.6092,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_2",
+    "source": "AK-47/C_28P.wav",
+    "microphone": 0,
+    "onset_seconds": 3.2572,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_3",
+    "source": "AK-47/C_28P.wav",
+    "microphone": 1,
+    "onset_seconds": 3.2553,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_far_0",
+    "source": "AK-47/C_31P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.3359,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_far_1",
+    "source": "AK-47/C_31P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.3361,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_far_2",
+    "source": "AK-47/C_31P.wav",
+    "microphone": 0,
+    "onset_seconds": 4.3993,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "rifle_shot_far_3",
+    "source": "AK-47/C_31P.wav",
+    "microphone": 1,
+    "onset_seconds": 4.3994,
+    "duration": 1.05,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_0",
+    "source": "AR-15/D_32P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.7035,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_1",
+    "source": "AR-15/D_32P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.7017,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_2",
+    "source": "AR-15/D_32P.wav",
+    "microphone": 0,
+    "onset_seconds": 5.6471,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_3",
+    "source": "AR-15/D_32P.wav",
+    "microphone": 1,
+    "onset_seconds": 5.6454,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_far_0",
+    "source": "AR-15/D_24P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.5473,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_far_1",
+    "source": "AR-15/D_24P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.5468,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_far_2",
+    "source": "AR-15/D_24P.wav",
+    "microphone": 0,
+    "onset_seconds": 3.9083,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "m4_shot_far_3",
+    "source": "AR-15/D_24P.wav",
+    "microphone": 1,
+    "onset_seconds": 3.9078,
+    "duration": 0.95,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_0",
+    "source": "1911/A_42P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.9394,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_1",
+    "source": "1911/A_42P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.9399,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_2",
+    "source": "1911/A_42P.wav",
+    "microphone": 0,
+    "onset_seconds": 4.9995,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_3",
+    "source": "1911/A_42P.wav",
+    "microphone": 1,
+    "onset_seconds": 5.0001,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_far_0",
+    "source": "1911/A_34P.wav",
+    "microphone": 0,
+    "onset_seconds": 1.5409,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_far_1",
+    "source": "1911/A_34P.wav",
+    "microphone": 1,
+    "onset_seconds": 1.5399,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_far_2",
+    "source": "1911/A_34P.wav",
+    "microphone": 0,
+    "onset_seconds": 6.6537,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "pistol_shot_far_3",
+    "source": "1911/A_34P.wav",
+    "microphone": 1,
+    "onset_seconds": 6.6528,
+    "duration": 0.85,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_0",
+    "source": "Tikka/W_29P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.5769,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_1",
+    "source": "Tikka/W_29P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.5753,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_2",
+    "source": "Tikka/W_29P.wav",
+    "microphone": 0,
+    "onset_seconds": 5.6646,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_3",
+    "source": "Tikka/W_29P.wav",
+    "microphone": 1,
+    "onset_seconds": 5.6629,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_far_0",
+    "source": "Tikka/W_24P.wav",
+    "microphone": 0,
+    "onset_seconds": 0.753,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_far_1",
+    "source": "Tikka/W_24P.wav",
+    "microphone": 1,
+    "onset_seconds": 0.7525,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_far_2",
+    "source": "Tikka/W_24P.wav",
+    "microphone": 0,
+    "onset_seconds": 5.375,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  },
+  {
+    "name": "sniper_shot_far_3",
+    "source": "Tikka/W_24P.wav",
+    "microphone": 1,
+    "onset_seconds": 5.3748,
+    "duration": 1.65,
+    "peak_dbfs": -2.05,
+    "clipped_samples": 0
+  }
+]

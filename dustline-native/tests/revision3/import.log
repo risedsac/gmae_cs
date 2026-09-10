@@ -1,0 +1,144 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Condition "_sock == -1" is true. Returning: FAILED
+   at: _inet_open (drivers/unix/net_socket_unix.cpp:288)
+ERROR: Condition "err != OK" is true. Returning: ERR_CANT_CREATE
+   at: listen (core/io/tcp_server.cpp:56)
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started 项目初始化 (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | 正在扫描文件结构……[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | 正在加载全局类名……[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | 正在校验 GDExtension……[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | 正在创建自动加载脚本……[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | 正在初始化插件……[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | 正在启动文件扫描……[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | Started 正在注册全局类…… (5 steps)[39m[0m
+[   0% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  16% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  33% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  50% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[  66% ] [90m[1mupdate_scripts_classes[22m | [39m[0m
+[92m[ DONE ][39m [1mupdate_scripts_classes[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started 正在扫描动作…… (15 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | awp.glb[39m[0m
+[   6% ] [90m[1m_update_scan_actions[22m | m4a1.glb[39m[0m
+[  12% ] [90m[1m_update_scan_actions[22m | rifle.glb[39m[0m
+[  18% ] [90m[1m_update_scan_actions[22m | sidearm.glb[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | combat-45.png[39m[0m
+[  31% ] [90m[1m_update_scan_actions[22m | combat-100.png[39m[0m
+[  37% ] [90m[1m_update_scan_actions[22m | combat-155.png[39m[0m
+[  43% ] [90m[1m_update_scan_actions[22m | run-30.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | run-65.png[39m[0m
+[  56% ] [90m[1m_update_scan_actions[22m | run-100.png[39m[0m
+[  62% ] [90m[1m_update_scan_actions[22m | view-action-28.png[39m[0m
+[  68% ] [90m[1m_update_scan_actions[22m | view-action-48.png[39m[0m
+[  75% ] [90m[1m_update_scan_actions[22m | view-action-68.png[39m[0m
+[  81% ] [90m[1m_update_scan_actions[22m | view-action-95.png[39m[0m
+[  87% ] [90m[1m_update_scan_actions[22m | view-action-122.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started 正在导入或重新导入资产 (28 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[   3% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[   6% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  10% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  13% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  17% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  20% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  24% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  27% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  31% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  34% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  37% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  41% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  44% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  48% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  51% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  55% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  58% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  62% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  65% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  68% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  72% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  75% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  79% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  82% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  86% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  89% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  93% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[   0% ] [90m[1mreimport[22m | 正在执行重新导入的前置操作……[39m[0m
+[   0% ] [90m[1mpreload_reimporting_scene[22m | Started 正在准备重新加载场景 (1 steps)[39m[0m
+[   0% ] [90m[1mpreload_reimporting_scene[22m | 正在分析场景 [空][39m[0m
+[  50% ] [90m[1mpreload_reimporting_scene[22m | 准备完成。[39m[0m
+[92m[ DONE ][39m [1mpreload_reimporting_scene[22m
+[0m
+[   0% ] [90m[1mreimport[22m | view-action-122.png[39m[0m
+[   3% ] [90m[1mreimport[22m | view-action-95.png[39m[0m
+[   6% ] [90m[1mreimport[22m | view-action-68.png[39m[0m
+[  10% ] [90m[1mreimport[22m | view-action-48.png[39m[0m
+[  13% ] [90m[1mreimport[22m | view-action-28.png[39m[0m
+[  17% ] [90m[1mreimport[22m | run-100.png[39m[0m
+[  20% ] [90m[1mreimport[22m | run-65.png[39m[0m
+[  24% ] [90m[1mreimport[22m | run-30.png[39m[0m
+[  27% ] [90m[1mreimport[22m | combat-155.png[39m[0m
+[  31% ] [90m[1mreimport[22m | combat-100.png[39m[0m
+[  34% ] [90m[1mreimport[22m | combat-45.png[39m[0m
+[  37% ] [90m[1mreimport[22m | sidearm_Woven olive sleeve weave.png[39m[0m
+[  41% ] [90m[1mreimport[22m | sidearm_Anatomical suede glove weave.png[39m[0m
+[  44% ] [90m[1mreimport[22m | sidearm_Grip polymer albedo.png[39m[0m
+[  48% ] [90m[1mreimport[22m | sidearm_Parkerized steel albedo.png[39m[0m
+[  51% ] [90m[1mreimport[22m | rifle_Woven olive sleeve weave.png[39m[0m
+[  55% ] [90m[1mreimport[22m | rifle_Anatomical suede glove weave.png[39m[0m
+[  58% ] [90m[1mreimport[22m | rifle_Grip polymer albedo.png[39m[0m
+[  62% ] [90m[1mreimport[22m | rifle_Oiled walnut albedo.png[39m[0m
+[  65% ] [90m[1mreimport[22m | rifle_Parkerized steel albedo.png[39m[0m
+[  68% ] [90m[1mreimport[22m | m4a1_Woven olive sleeve weave.png[39m[0m
+[  72% ] [90m[1mreimport[22m | m4a1_Anatomical suede glove weave.png[39m[0m
+[  75% ] [90m[1mreimport[22m | awp_Woven olive sleeve weave.png[39m[0m
+[  79% ] [90m[1mreimport[22m | awp_Anatomical suede glove weave.png[39m[0m
+[  82% ] [90m[1mreimport[22m | sidearm.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started 导入场景 (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | 导入场景中...[39m[0m
+[   1% ] [90m[1mimport[22m | 执行自定义脚本...[39m[0m
+[  99% ] [90m[1mimport[22m | 保存中...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  86% ] [90m[1mreimport[22m | rifle.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started 导入场景 (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | 导入场景中...[39m[0m
+[   1% ] [90m[1mimport[22m | 执行自定义脚本...[39m[0m
+[  99% ] [90m[1mimport[22m | 保存中...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  89% ] [90m[1mreimport[22m | m4a1.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started 导入场景 (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | 导入场景中...[39m[0m
+[   1% ] [90m[1mimport[22m | 执行自定义脚本...[39m[0m
+[  99% ] [90m[1mimport[22m | 保存中...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  93% ] [90m[1mreimport[22m | awp.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started 导入场景 (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | 导入场景中...[39m[0m
+[   1% ] [90m[1mimport[22m | 执行自定义脚本...[39m[0m
+[  99% ] [90m[1mimport[22m | 保存中...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  96% ] [90m[1mreimport[22m | 正在结束资产导入……[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started 正在导入或重新导入资产 (28 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | 正在执行重新导入的后置操作……[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started 正在加载编辑器 (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | 正在加载编辑器布局……[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | 正在加载停靠面板……[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+ERROR: Condition "_sock == -1" is true. Returning: FAILED
+   at: _inet_open (drivers/unix/net_socket_unix.cpp:288)
+ERROR: Condition "err != OK" is true. Returning: ERR_CANT_CREATE
+   at: listen (core/io/tcp_server.cpp:56)

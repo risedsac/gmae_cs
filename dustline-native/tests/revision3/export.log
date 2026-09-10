@@ -1,0 +1,292 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ERROR: Condition "_sock == -1" is true. Returning: FAILED
+   at: _inet_open (drivers/unix/net_socket_unix.cpp:288)
+ERROR: Condition "err != OK" is true. Returning: ERR_CANT_CREATE
+   at: listen (core/io/tcp_server.cpp:56)
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started 项目初始化 (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | 正在扫描文件结构……[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | 正在加载全局类名……[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | 正在校验 GDExtension……[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | 正在创建自动加载脚本……[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | 正在初始化插件……[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | 正在启动文件扫描……[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started 正在扫描动作…… (3 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | run-20.png[39m[0m
+[  25% ] [90m[1m_update_scan_actions[22m | run-45.png[39m[0m
+[  50% ] [90m[1m_update_scan_actions[22m | run-70.png[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started 正在导入或重新导入资产 (3 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  25% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[  50% ] [90m[1mreimport[22m | 正在准备重新导入文件……[39m[0m
+[   0% ] [90m[1mreimport[22m | 正在执行重新导入的前置操作……[39m[0m
+[   0% ] [90m[1mreimport[22m | run-20.png[39m[0m
+[  25% ] [90m[1mreimport[22m | run-45.png[39m[0m
+[  50% ] [90m[1mreimport[22m | run-70.png[39m[0m
+[  75% ] [90m[1mreimport[22m | 正在结束资产导入……[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started 正在导入或重新导入资产 (3 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | 正在执行重新导入的后置操作……[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1msavepack[22m | Started 打包中 (102 steps)[39m[0m
+[   1% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/audio-analysis-v3.json[39m[0m
+[   1% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/audio-analysis.json[39m[0m
+[   2% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/bomb_beep.wav-deaa2efb929d74fc9ae056182c1c28b2.sample[39m[0m
+[   2% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/bomb_beep.wav.import[39m[0m
+[   3% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/buy.wav-6e21632cccac1281425865fe59d9d2c6.sample[39m[0m
+[   3% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/buy.wav.import[39m[0m
+[   4% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/explosion.wav-4dcccbd27187cfdac205309f792899a7.sample[39m[0m
+[   4% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/explosion.wav.import[39m[0m
+[   5% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot.wav-bce3de3dd5e9c9865d59fc10f3ec8276.sample[39m[0m
+[   5% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot.wav.import[39m[0m
+[   5% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_0.wav-ef72238430f7fd9ee11da080617b9da4.sample[39m[0m
+[   5% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_0.wav.import[39m[0m
+[   6% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_1.wav-12fd8520569f7040d5f990653b68e1e7.sample[39m[0m
+[   6% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_1.wav.import[39m[0m
+[   7% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_2.wav-ed1d1d6fe00122a7e3cf502addf3017e.sample[39m[0m
+[   7% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_2.wav.import[39m[0m
+[   8% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_3.wav-0e7a409853ac84e79865762e410b25a6.sample[39m[0m
+[   8% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_3.wav.import[39m[0m
+[   9% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_far_0.wav-8c3cf1bb44a0c5bbc6adb6173d48a408.sample[39m[0m
+[   9% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_far_0.wav.import[39m[0m
+[   9% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_far_1.wav-820447f5017671d62a896596868ddc6f.sample[39m[0m
+[   9% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_far_1.wav.import[39m[0m
+[  10% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_far_2.wav-a8fdef3e281e5adae5c4ccef4cece92c.sample[39m[0m
+[  10% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_far_2.wav.import[39m[0m
+[  11% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_far_3.wav-51a98e418bc9f30c4c0b0f5c1551127a.sample[39m[0m
+[  11% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_far_3.wav.import[39m[0m
+[  12% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_occluded_0.wav-be70668268649d959c039185d1c2b0bf.sample[39m[0m
+[  12% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_occluded_0.wav.import[39m[0m
+[  13% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_occluded_1.wav-7cc3fa3472e39c7cab1f49451b9e4355.sample[39m[0m
+[  13% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_occluded_1.wav.import[39m[0m
+[  13% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_occluded_2.wav-f42c326b0df08be7cb65f2f1e5fcb01c.sample[39m[0m
+[  13% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_occluded_2.wav.import[39m[0m
+[  14% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4_shot_occluded_3.wav-2d18d1a51ae83710e1efaa439832b5d9.sample[39m[0m
+[  14% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/m4_shot_occluded_3.wav.import[39m[0m
+[  15% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pin.wav-17cde6c2c6e5a9896a8e177607ebc9d4.sample[39m[0m
+[  15% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pin.wav.import[39m[0m
+[  16% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_reload.wav-4cf96a70150263ad2258fe20a7ff0979.sample[39m[0m
+[  16% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_reload.wav.import[39m[0m
+[  17% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot.wav-7f1edbc6bdfcb1d9a2e828e123287b2e.sample[39m[0m
+[  17% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot.wav.import[39m[0m
+[  17% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_0.wav-b68bba04603cefe5c57e0178bdb462d4.sample[39m[0m
+[  17% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_0.wav.import[39m[0m
+[  18% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_1.wav-effdc94024516d8df70220c5b07a7cc8.sample[39m[0m
+[  18% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_1.wav.import[39m[0m
+[  19% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_2.wav-b3ef21252561bdc9866782a00b0e2416.sample[39m[0m
+[  19% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_2.wav.import[39m[0m
+[  20% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_3.wav-81c5b921a7d31894e885641d4381a1c9.sample[39m[0m
+[  20% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_3.wav.import[39m[0m
+[  21% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_far_0.wav-4142a2993aba079f9f2b4893c8fb4786.sample[39m[0m
+[  21% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_far_0.wav.import[39m[0m
+[  21% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_far_1.wav-256958c5ef47bff4a029ce27ec313e23.sample[39m[0m
+[  21% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_far_1.wav.import[39m[0m
+[  22% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_far_2.wav-e8afe5936372b5d547786ab792184fdb.sample[39m[0m
+[  22% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_far_2.wav.import[39m[0m
+[  23% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_far_3.wav-84db5ad85419c62c92154ebeac979854.sample[39m[0m
+[  23% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_far_3.wav.import[39m[0m
+[  24% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_occluded_0.wav-4d89f8aad0190e4948bc96105e100e11.sample[39m[0m
+[  24% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_occluded_0.wav.import[39m[0m
+[  25% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_occluded_1.wav-7d31ecfe93149a0ce9165ffa5364d087.sample[39m[0m
+[  25% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_occluded_1.wav.import[39m[0m
+[  26% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_occluded_2.wav-aa35ef758ca877c88c69f5718b9ab04e.sample[39m[0m
+[  26% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_occluded_2.wav.import[39m[0m
+[  26% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/pistol_shot_occluded_3.wav-7e16991ba667d97b1feb1023a9c13099.sample[39m[0m
+[  26% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/pistol_shot_occluded_3.wav.import[39m[0m
+[  27% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/planted.wav-4d51b98ab4e9b73cc2232c5f6be70e0e.sample[39m[0m
+[  27% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/planted.wav.import[39m[0m
+[  28% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_reload.wav-860c9bd6a3c153dedd7ea3bc978be327.sample[39m[0m
+[  28% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_reload.wav.import[39m[0m
+[  29% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot.wav-710bde57ab5392ff7dff85c4c2e6d3ff.sample[39m[0m
+[  29% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot.wav.import[39m[0m
+[  30% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_0.wav-5b0e9213d7e7f3c4bf3913acd2b95736.sample[39m[0m
+[  30% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_0.wav.import[39m[0m
+[  30% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_1.wav-08fe5af89d693088c9d09b09c0493c50.sample[39m[0m
+[  30% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_1.wav.import[39m[0m
+[  31% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_2.wav-8c476d22e4ce5020e28ca9a572d1d282.sample[39m[0m
+[  31% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_2.wav.import[39m[0m
+[  32% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_3.wav-8cbb04cbf3a999a71ab369e477f9b039.sample[39m[0m
+[  32% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_3.wav.import[39m[0m
+[  33% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_far_0.wav-7b0140b3b20671219319ec0364b59fd8.sample[39m[0m
+[  33% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_far_0.wav.import[39m[0m
+[  33% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_far_1.wav-c1c8a0e7ee8a61e28b26fc7537014b78.sample[39m[0m
+[  33% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_far_1.wav.import[39m[0m
+[  33% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_far_2.wav-75a6455360cecbf9790b9c6884c0ff25.sample[39m[0m
+[  33% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_far_2.wav.import[39m[0m
+[  34% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_far_3.wav-afaa4b8726ff961e67d5ee4e543ac499.sample[39m[0m
+[  34% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_far_3.wav.import[39m[0m
+[  35% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_occluded_0.wav-22e1029de25df3433d1285c1c12ea586.sample[39m[0m
+[  35% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_occluded_0.wav.import[39m[0m
+[  36% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_occluded_1.wav-79bc6b60cf724f002cf819d5d7f6100d.sample[39m[0m
+[  36% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_occluded_1.wav.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_occluded_2.wav-817b270414b2fdc9541c9e4090f84ee1.sample[39m[0m
+[  37% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_occluded_2.wav.import[39m[0m
+[  37% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_shot_occluded_3.wav-3e68e63b2e1c1c5e9292492c2adee8e6.sample[39m[0m
+[  37% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/rifle_shot_occluded_3.wav.import[39m[0m
+[  38% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/round_win.wav-455f3ebe5ce57e03dd882a6f016050af.sample[39m[0m
+[  38% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/round_win.wav.import[39m[0m
+[  39% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/smoke_hiss.wav-6abb4cee25c5d6da4b9fc40242f4c96f.sample[39m[0m
+[  39% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/smoke_hiss.wav.import[39m[0m
+[  40% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot.wav-f66564be1ed23aa326af3bb883d29a4e.sample[39m[0m
+[  40% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot.wav.import[39m[0m
+[  41% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_0.wav-6c809237b742b2ac9f25566daa087a8d.sample[39m[0m
+[  41% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_0.wav.import[39m[0m
+[  41% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_1.wav-ad68fd560dc201f06225791f94744732.sample[39m[0m
+[  41% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_1.wav.import[39m[0m
+[  42% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_2.wav-b91ebf6eb3d119db046ecc371f5b3e46.sample[39m[0m
+[  42% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_2.wav.import[39m[0m
+[  43% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_3.wav-752070997220e61f1685d8294c4f3061.sample[39m[0m
+[  43% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_3.wav.import[39m[0m
+[  44% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_far_0.wav-191923c7fb5baf36453d0dee8c63b92d.sample[39m[0m
+[  44% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_far_0.wav.import[39m[0m
+[  45% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_far_1.wav-c35996f30a339a3e78c65da2736ed13e.sample[39m[0m
+[  45% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_far_1.wav.import[39m[0m
+[  45% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_far_2.wav-71704b20713310c3d35683821c0cd935.sample[39m[0m
+[  45% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_far_2.wav.import[39m[0m
+[  46% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_far_3.wav-1a29fc52bb0803ef160a67f9c3ca490e.sample[39m[0m
+[  46% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_far_3.wav.import[39m[0m
+[  47% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_occluded_0.wav-e8ad60dc975cf4d2b41288d3b1406a77.sample[39m[0m
+[  47% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_occluded_0.wav.import[39m[0m
+[  48% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_occluded_1.wav-aed8550ee71f262bccf956d22d509c66.sample[39m[0m
+[  48% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_occluded_1.wav.import[39m[0m
+[  49% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_occluded_2.wav-0e827e37ad314876e4c48d4212de2099.sample[39m[0m
+[  49% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_occluded_2.wav.import[39m[0m
+[  50% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sniper_shot_occluded_3.wav-6fd0671e640af65dbadfa69862ae2902.sample[39m[0m
+[  50% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/sniper_shot_occluded_3.wav.import[39m[0m
+[  50% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/step0.wav-edd38b07c55e539c69048d240711cb66.sample[39m[0m
+[  50% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/step0.wav.import[39m[0m
+[  51% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/step1.wav-984faedba0d138303a01f75e56501959.sample[39m[0m
+[  51% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/step1.wav.import[39m[0m
+[  52% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/step2.wav-82624fbcf2f2c3fad967037a6d4c98dc.sample[39m[0m
+[  52% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/step2.wav.import[39m[0m
+[  53% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/step3.wav-120c49a02dcd4606da68e9b65608bf04.sample[39m[0m
+[  53% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/step3.wav.import[39m[0m
+[  54% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/step4.wav-a96a01b9a16e8d232a5c43024711adf5.sample[39m[0m
+[  54% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/step4.wav.import[39m[0m
+[  54% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/step5.wav-ea2a5d946a42333983d23dd6523c9475.sample[39m[0m
+[  54% ] [90m[1msavepack[22m | 正在保存文件：res://assets/audio/step5.wav.import[39m[0m
+[  55% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/wooden_crate_02_arm_2k.jpg-9336a7c6963c6393c9ab02446ccf4d57.ctex[39m[0m
+[  55% ] [90m[1msavepack[22m | 正在保存文件：res://assets/crate/textures/wooden_crate_02_arm_2k.jpg.import[39m[0m
+[  56% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/wooden_crate_02_diff_2k.jpg-3df27ae18e1ee084fecefd30ac9c09dc.ctex[39m[0m
+[  56% ] [90m[1msavepack[22m | 正在保存文件：res://assets/crate/textures/wooden_crate_02_diff_2k.jpg.import[39m[0m
+[  57% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/wooden_crate_02_nor_gl_2k.jpg-f026c8957d53b3ab7bfccfd2963614f7.ctex[39m[0m
+[  57% ] [90m[1msavepack[22m | 正在保存文件：res://assets/crate/textures/wooden_crate_02_nor_gl_2k.jpg.import[39m[0m
+[  58% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/wooden_crate_02.gltf-6c7e01d756f752244f60522fd66eca51.scn[39m[0m
+[  58% ] [90m[1msavepack[22m | 正在保存文件：res://assets/crate/wooden_crate_02.gltf.import[39m[0m
+[  58% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/NotoSansCJK-Regular.ttc-bf6a5134ec173401ff9bd69115e437ec.fontdata[39m[0m
+[  58% ] [90m[1msavepack[22m | 正在保存文件：res://assets/fonts/NotoSansCJK-Regular.ttc.import[39m[0m
+[  59% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/beige_wall_001_albedo.jpg-d25de8f70cfe3dde063c7255771e6523.ctex[39m[0m
+[  59% ] [90m[1msavepack[22m | 正在保存文件：res://assets/materials/beige_wall_001_albedo.jpg.import[39m[0m
+[  60% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/beige_wall_001_normal.jpg-5a894e095d910d0fce530047efc52ad5.ctex[39m[0m
+[  60% ] [90m[1msavepack[22m | 正在保存文件：res://assets/materials/beige_wall_001_normal.jpg.import[39m[0m
+[  61% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/beige_wall_001_roughness.jpg-a2363ae6be312667d3a321c3e0e37ee6.ctex[39m[0m
+[  61% ] [90m[1msavepack[22m | 正在保存文件：res://assets/materials/beige_wall_001_roughness.jpg.import[39m[0m
+[  62% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sandy_gravel_02_albedo.jpg-ce34a74b3842d979135a5b33063e1aa6.ctex[39m[0m
+[  62% ] [90m[1msavepack[22m | 正在保存文件：res://assets/materials/sandy_gravel_02_albedo.jpg.import[39m[0m
+[  62% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sandy_gravel_02_normal.jpg-44d64ff8b0db3df9706c7a0b88db93f9.ctex[39m[0m
+[  62% ] [90m[1msavepack[22m | 正在保存文件：res://assets/materials/sandy_gravel_02_normal.jpg.import[39m[0m
+[  63% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sandy_gravel_02_roughness.jpg-306c4616419dd6bc989df827f5ec7d2c.ctex[39m[0m
+[  63% ] [90m[1msavepack[22m | 正在保存文件：res://assets/materials/sandy_gravel_02_roughness.jpg.import[39m[0m
+[  64% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/awp.glb-44db86f86e91d8bc191e050ef619c8f5.scn[39m[0m
+[  64% ] [90m[1msavepack[22m | 正在保存文件：res://assets/awp.glb.import[39m[0m
+[  65% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/awp_Anatomical suede glove weave.png-0ea9bd39539e83c42c83c7d5e5ae981b.ctex[39m[0m
+[  65% ] [90m[1msavepack[22m | 正在保存文件：res://assets/awp_Anatomical suede glove weave.png.import[39m[0m
+[  66% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/awp_rifle_Olive ripstop albedo.png-159f5f8da32897a6c6a8ae4e9fbb9322.ctex[39m[0m
+[  66% ] [90m[1msavepack[22m | 正在保存文件：res://assets/awp_rifle_Olive ripstop albedo.png.import[39m[0m
+[  66% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/awp_rifle_Suede gloves albedo.png-40b36e14f31c5f9a4658e1918662d222.ctex[39m[0m
+[  66% ] [90m[1msavepack[22m | 正在保存文件：res://assets/awp_rifle_Suede gloves albedo.png.import[39m[0m
+[  66% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/awp_Woven olive sleeve weave.png-21b7d3d3535ee56eb78149705e9b117a.ctex[39m[0m
+[  66% ] [90m[1msavepack[22m | 正在保存文件：res://assets/awp_Woven olive sleeve weave.png.import[39m[0m
+[  67% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4a1.glb-5af7757e91b99a6e929333ffec93faf3.scn[39m[0m
+[  67% ] [90m[1msavepack[22m | 正在保存文件：res://assets/m4a1.glb.import[39m[0m
+[  68% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4a1_Anatomical suede glove weave.png-381493c44fe7792b265c533cfa37fd0a.ctex[39m[0m
+[  68% ] [90m[1msavepack[22m | 正在保存文件：res://assets/m4a1_Anatomical suede glove weave.png.import[39m[0m
+[  69% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4a1_rifle_Olive ripstop albedo.png-3d32588df2ca3de1c380b5d3c5960876.ctex[39m[0m
+[  69% ] [90m[1msavepack[22m | 正在保存文件：res://assets/m4a1_rifle_Olive ripstop albedo.png.import[39m[0m
+[  69% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4a1_rifle_Suede gloves albedo.png-44b4a5ff0125e741419c58fc56105f4d.ctex[39m[0m
+[  69% ] [90m[1msavepack[22m | 正在保存文件：res://assets/m4a1_rifle_Suede gloves albedo.png.import[39m[0m
+[  70% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/m4a1_Woven olive sleeve weave.png-1afef94d8358f5c1de947fd1e31d5094.ctex[39m[0m
+[  70% ] [90m[1msavepack[22m | 正在保存文件：res://assets/m4a1_Woven olive sleeve weave.png.import[39m[0m
+[  71% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/exported/133200997/export-3070c538c03ee49b7677ff960a3f5195-main.scn[39m[0m
+[  72% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator-source_file2.jpg-cae6ac14be103992f6f9ecfef6fd5932.ctex[39m[0m
+[  72% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator-source_file2.jpg.import[39m[0m
+[  73% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator-source_vanguard_vanguard_diffuse_tga.jpg-b2163ef0d5c92ba3772448f12a19e181.ctex[39m[0m
+[  73% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator-source_vanguard_vanguard_diffuse_tga.jpg.import[39m[0m
+[  74% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator.glb-41f7f405e816d4f73763cd9632ee41bb.scn[39m[0m
+[  74% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator.glb.import[39m[0m
+[  74% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator_Charcoal balaclava albedo.png-b4ad844d999952af9a1c0f5cdf2a2faa.ctex[39m[0m
+[  74% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator_Charcoal balaclava albedo.png.import[39m[0m
+[  75% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator_Grip polymer albedo.png-b0509dd684583992a8b9ae1ad83a6d95.ctex[39m[0m
+[  75% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator_Grip polymer albedo.png.import[39m[0m
+[  76% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator_Navy ripstop uniform albedo.png-20a063620b9d49c245dd2fdc807bc920.ctex[39m[0m
+[  76% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator_Navy ripstop uniform albedo.png.import[39m[0m
+[  77% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator_Ranger green carrier albedo.png-a8e80a6276ae8d7e0524c923b6f98100.ctex[39m[0m
+[  77% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator_Ranger green carrier albedo.png.import[39m[0m
+[  78% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator_Suede gloves albedo.png-0ee2b88459e9269400da84f3cde1840a.ctex[39m[0m
+[  78% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator_Suede gloves albedo.png.import[39m[0m
+[  78% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/operator_Woven carrier webbing albedo.png-00ac1178bbbda969b767e3056c09f85f.ctex[39m[0m
+[  78% ] [90m[1msavepack[22m | 正在保存文件：res://assets/operator_Woven carrier webbing albedo.png.import[39m[0m
+[  79% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle.glb-be774c27adb0b6b094e4f4a1bc968c26.scn[39m[0m
+[  79% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle.glb.import[39m[0m
+[  80% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Anatomical suede glove weave.png-3e246a947c1530c9bddf4f1306bcb42c.ctex[39m[0m
+[  80% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Anatomical suede glove weave.png.import[39m[0m
+[  81% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Grip polymer albedo.png-f7ec664e616b3abd044c5c665cfb1aa4.ctex[39m[0m
+[  81% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Grip polymer albedo.png.import[39m[0m
+[  82% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Oiled walnut albedo.png-188f8653f5b41d5c3e03a41026c80221.ctex[39m[0m
+[  82% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Oiled walnut albedo.png.import[39m[0m
+[  82% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Olive ripstop albedo.png-092e2934bae1166450d1225c7924940d.ctex[39m[0m
+[  82% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Olive ripstop albedo.png.import[39m[0m
+[  83% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Parkerized steel albedo.png-0054078048998f4e007019bfaf2e3562.ctex[39m[0m
+[  83% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Parkerized steel albedo.png.import[39m[0m
+[  84% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Suede gloves albedo.png-286058b1c065b83d5e827a90471a3c1e.ctex[39m[0m
+[  84% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Suede gloves albedo.png.import[39m[0m
+[  85% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/rifle_Woven olive sleeve weave.png-aa6b2d439f216ca438cee0094872297f.ctex[39m[0m
+[  85% ] [90m[1msavepack[22m | 正在保存文件：res://assets/rifle_Woven olive sleeve weave.png.import[39m[0m
+[  86% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm.glb-de7c33d9b1dec0b6e934a8cf33a87288.scn[39m[0m
+[  86% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm.glb.import[39m[0m
+[  86% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm_Anatomical suede glove weave.png-b2e0f8623d6181a6365e5da79f0afebc.ctex[39m[0m
+[  86% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm_Anatomical suede glove weave.png.import[39m[0m
+[  87% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm_Grip polymer albedo.png-5125b85120c296d7f2a99de3985e7dfa.ctex[39m[0m
+[  87% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm_Grip polymer albedo.png.import[39m[0m
+[  88% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm_Olive ripstop albedo.png-2f2d59ea3766cb985667adffaa26e1ba.ctex[39m[0m
+[  88% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm_Olive ripstop albedo.png.import[39m[0m
+[  89% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm_Parkerized steel albedo.png-b9c77f32db4a524637ace635054f62eb.ctex[39m[0m
+[  89% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm_Parkerized steel albedo.png.import[39m[0m
+[  90% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm_Suede gloves albedo.png-056fd38e160ac4e14fb18d426fec6d3d.ctex[39m[0m
+[  90% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm_Suede gloves albedo.png.import[39m[0m
+[  90% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/imported/sidearm_Woven olive sleeve weave.png-cfb9d7c2b4b9b5c368503b373d12e84b.ctex[39m[0m
+[  90% ] [90m[1msavepack[22m | 正在保存文件：res://assets/sidearm_Woven olive sleeve weave.png.import[39m[0m
+[  91% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/armed_pose.gdc[39m[0m
+[  92% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/audio.gdc[39m[0m
+[  93% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/bot.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/game.gdc[39m[0m
+[  94% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/grenade.gdc[39m[0m
+[  95% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/hud.gdc[39m[0m
+[  96% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/player.gdc[39m[0m
+[  97% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/weapons.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/world.gdc[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://main.tscn.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/armed_pose.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/audio.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/bot.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/game.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/grenade.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/hud.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/player.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/weapons.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://scripts/world.gd.remap[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/global_script_class_cache.cfg[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://.godot/uid_cache.bin[39m[0m
+[  98% ] [90m[1msavepack[22m | 正在保存文件：res://project.binary[39m[0m
+[92m[ DONE ][39m [1msavepack[22m
+[0m
+ERROR: Condition "_sock == -1" is true. Returning: FAILED
+   at: _inet_open (drivers/unix/net_socket_unix.cpp:288)
+ERROR: Condition "err != OK" is true. Returning: ERR_CANT_CREATE
+   at: listen (core/io/tcp_server.cpp:56)

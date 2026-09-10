@@ -1,0 +1,37 @@
+INFO Draco is available, use library at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_draco_bridge.so
+ERROR MeshOptimizer is not available because library could not be found at /usr/lib/blender/5.2/scripts/addons_core/io_scene_gltf2/libbf_intern_meshopt_bridge.so
+18:44:18 | INFO: Starting glTF 2.0 export
+18:44:18 | INFO: Extracting primitive: Cube.020
+18:44:18 | INFO: Primitives created: 2
+18:44:18 | INFO: Extracting primitive: Cone.002
+18:44:18 | INFO: Primitives created: 5
+18:44:18 | INFO: Extracting primitive: Curved magazine
+18:44:18 | INFO: Primitives created: 2
+18:44:18 | INFO: Extracting primitive: Cone.016
+18:44:18 | INFO: Primitives created: 4
+18:44:18 | INFO: Extracting primitive: Curled support finger
+18:44:18 | INFO: Primitives created: 4
+18:44:18 | INFO: Finished glTF 2.0 export in 0.08860445022583008 s
+
+Warning: No mesh data to join
+18:44:18 | INFO: Starting glTF 2.0 export
+18:44:18 | INFO: Extracting primitive: Cube.023
+18:44:18 | INFO: Primitives created: 3
+18:44:18 | INFO: Extracting primitive: Cone.020
+18:44:18 | INFO: Primitives created: 4
+18:44:18 | INFO: Extracting primitive: Cube.041
+18:44:18 | INFO: Primitives created: 1
+18:44:18 | INFO: Extracting primitive: Cone.022
+18:44:18 | INFO: Primitives created: 4
+18:44:18 | INFO: Extracting primitive: Cone.024
+18:44:18 | INFO: Primitives created: 4
+18:44:18 | INFO: Finished glTF 2.0 export in 0.06239914894104004 s
+/home/wzt/Documents/Codex/2026-09-07/zuo/work/dustline/models/build_assets.py:99: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  world=bpy.context.scene.world or bpy.data.worlds.new('Studio'); bpy.context.scene.world=world; world.use_nodes=True
+00:12.287  render           | Saved: '/home/wzt/Documents/Codex/2026-09-07/zuo/work/weapon-studio.png'
+
+Info: Saved as "Dustline-weapons.blend"
+Original weapon assets exported and rendered.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-09-01 00:24:57)
+
+Blender quit

@@ -1,0 +1,203 @@
+WorkerThreadPool: 16 threads, 4 max low-priority.
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+SDL: Init OK!
+Using "default" pen tablet driver...
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+CORE API HASH: 2004498165
+EDITOR API HASH: 1696660745
+Loading resource: res://tests/regression.gd remapped: res://tests/regression.gd
+Completed load for: 'res://tests/regression.gd' remapped 'res://tests/regression.gd' at thread -1
+SceneTreeFTI: traversal method DEFAULT
+Loaded system CA certificates
+Loading resource: res://main.tscn remapped: res://main.tscn
+Loading resource: res://scripts/game.gd remapped: res://scripts/game.gd
+Loading resource: res://assets/crate/wooden_crate_02.gltf remapped: res://assets/crate/wooden_crate_02.gltf
+Loading resource: res://.godot/imported/wooden_crate_02.gltf-6c7e01d756f752244f60522fd66eca51.scn remapped: res://.godot/imported/wooden_crate_02.gltf-6c7e01d756f752244f60522fd66eca51.scn
+Loading resource: res://assets/crate/textures/wooden_crate_02_diff_2k.jpg remapped: res://assets/crate/textures/wooden_crate_02_diff_2k.jpg
+Loading resource: res://.godot/imported/wooden_crate_02_diff_2k.jpg-3df27ae18e1ee084fecefd30ac9c09dc.ctex remapped: res://.godot/imported/wooden_crate_02_diff_2k.jpg-3df27ae18e1ee084fecefd30ac9c09dc.ctex
+Completed load for: 'res://assets/crate/textures/wooden_crate_02_diff_2k.jpg' remapped 'res://assets/crate/textures/wooden_crate_02_diff_2k.jpg' at thread -1
+Loading resource: res://assets/crate/textures/wooden_crate_02_arm_2k.jpg remapped: res://assets/crate/textures/wooden_crate_02_arm_2k.jpg
+Loading resource: res://.godot/imported/wooden_crate_02_arm_2k.jpg-9336a7c6963c6393c9ab02446ccf4d57.ctex remapped: res://.godot/imported/wooden_crate_02_arm_2k.jpg-9336a7c6963c6393c9ab02446ccf4d57.ctex
+Completed load for: 'res://assets/crate/textures/wooden_crate_02_arm_2k.jpg' remapped 'res://assets/crate/textures/wooden_crate_02_arm_2k.jpg' at thread -1
+Loading resource: res://assets/crate/textures/wooden_crate_02_nor_gl_2k.jpg remapped: res://assets/crate/textures/wooden_crate_02_nor_gl_2k.jpg
+Loading resource: res://.godot/imported/wooden_crate_02_nor_gl_2k.jpg-f026c8957d53b3ab7bfccfd2963614f7.ctex remapped: res://.godot/imported/wooden_crate_02_nor_gl_2k.jpg-f026c8957d53b3ab7bfccfd2963614f7.ctex
+Completed load for: 'res://assets/crate/textures/wooden_crate_02_nor_gl_2k.jpg' remapped 'res://assets/crate/textures/wooden_crate_02_nor_gl_2k.jpg' at thread -1
+Completed load for: 'res://assets/crate/wooden_crate_02.gltf' remapped 'res://assets/crate/wooden_crate_02.gltf' at thread -1
+Loading resource: res://assets/operator.glb remapped: res://assets/operator.glb
+Loading resource: res://.godot/imported/operator.glb-41f7f405e816d4f73763cd9632ee41bb.scn remapped: res://.godot/imported/operator.glb-41f7f405e816d4f73763cd9632ee41bb.scn
+Loading resource: res://assets/operator_Navy ripstop uniform albedo.png remapped: res://assets/operator_Navy ripstop uniform albedo.png
+Loading resource: res://.godot/imported/operator_Navy ripstop uniform albedo.png-20a063620b9d49c245dd2fdc807bc920.ctex remapped: res://.godot/imported/operator_Navy ripstop uniform albedo.png-20a063620b9d49c245dd2fdc807bc920.ctex
+Completed load for: 'res://assets/operator_Navy ripstop uniform albedo.png' remapped 'res://assets/operator_Navy ripstop uniform albedo.png' at thread -1
+Loading resource: res://assets/operator_Grip polymer albedo.png remapped: res://assets/operator_Grip polymer albedo.png
+Loading resource: res://.godot/imported/operator_Grip polymer albedo.png-b0509dd684583992a8b9ae1ad83a6d95.ctex remapped: res://.godot/imported/operator_Grip polymer albedo.png-b0509dd684583992a8b9ae1ad83a6d95.ctex
+Completed load for: 'res://assets/operator_Grip polymer albedo.png' remapped 'res://assets/operator_Grip polymer albedo.png' at thread -1
+Loading resource: res://assets/operator_Ranger green carrier albedo.png remapped: res://assets/operator_Ranger green carrier albedo.png
+Loading resource: res://.godot/imported/operator_Ranger green carrier albedo.png-a8e80a6276ae8d7e0524c923b6f98100.ctex remapped: res://.godot/imported/operator_Ranger green carrier albedo.png-a8e80a6276ae8d7e0524c923b6f98100.ctex
+Completed load for: 'res://assets/operator_Ranger green carrier albedo.png' remapped 'res://assets/operator_Ranger green carrier albedo.png' at thread -1
+Loading resource: res://assets/operator_Woven carrier webbing albedo.png remapped: res://assets/operator_Woven carrier webbing albedo.png
+Loading resource: res://.godot/imported/operator_Woven carrier webbing albedo.png-00ac1178bbbda969b767e3056c09f85f.ctex remapped: res://.godot/imported/operator_Woven carrier webbing albedo.png-00ac1178bbbda969b767e3056c09f85f.ctex
+Completed load for: 'res://assets/operator_Woven carrier webbing albedo.png' remapped 'res://assets/operator_Woven carrier webbing albedo.png' at thread -1
+Loading resource: res://assets/operator_Suede gloves albedo.png remapped: res://assets/operator_Suede gloves albedo.png
+Loading resource: res://.godot/imported/operator_Suede gloves albedo.png-0ee2b88459e9269400da84f3cde1840a.ctex remapped: res://.godot/imported/operator_Suede gloves albedo.png-0ee2b88459e9269400da84f3cde1840a.ctex
+Completed load for: 'res://assets/operator_Suede gloves albedo.png' remapped 'res://assets/operator_Suede gloves albedo.png' at thread -1
+Loading resource: res://assets/operator_Charcoal balaclava albedo.png remapped: res://assets/operator_Charcoal balaclava albedo.png
+Loading resource: res://.godot/imported/operator_Charcoal balaclava albedo.png-b4ad844d999952af9a1c0f5cdf2a2faa.ctex remapped: res://.godot/imported/operator_Charcoal balaclava albedo.png-b4ad844d999952af9a1c0f5cdf2a2faa.ctex
+Completed load for: 'res://assets/operator_Charcoal balaclava albedo.png' remapped 'res://assets/operator_Charcoal balaclava albedo.png' at thread -1
+Completed load for: 'res://assets/operator.glb' remapped 'res://assets/operator.glb' at thread -1
+Loading resource: res://assets/rifle.glb remapped: res://assets/rifle.glb
+Loading resource: res://.godot/imported/rifle.glb-be774c27adb0b6b094e4f4a1bc968c26.scn remapped: res://.godot/imported/rifle.glb-be774c27adb0b6b094e4f4a1bc968c26.scn
+Loading resource: res://assets/rifle_Parkerized steel albedo.png remapped: res://assets/rifle_Parkerized steel albedo.png
+Loading resource: res://.godot/imported/rifle_Parkerized steel albedo.png-0054078048998f4e007019bfaf2e3562.ctex remapped: res://.godot/imported/rifle_Parkerized steel albedo.png-0054078048998f4e007019bfaf2e3562.ctex
+Completed load for: 'res://assets/rifle_Parkerized steel albedo.png' remapped 'res://assets/rifle_Parkerized steel albedo.png' at thread -1
+Loading resource: res://assets/rifle_Oiled walnut albedo.png remapped: res://assets/rifle_Oiled walnut albedo.png
+Loading resource: res://.godot/imported/rifle_Oiled walnut albedo.png-188f8653f5b41d5c3e03a41026c80221.ctex remapped: res://.godot/imported/rifle_Oiled walnut albedo.png-188f8653f5b41d5c3e03a41026c80221.ctex
+Completed load for: 'res://assets/rifle_Oiled walnut albedo.png' remapped 'res://assets/rifle_Oiled walnut albedo.png' at thread -1
+Loading resource: res://assets/rifle_Grip polymer albedo.png remapped: res://assets/rifle_Grip polymer albedo.png
+Loading resource: res://.godot/imported/rifle_Grip polymer albedo.png-f7ec664e616b3abd044c5c665cfb1aa4.ctex remapped: res://.godot/imported/rifle_Grip polymer albedo.png-f7ec664e616b3abd044c5c665cfb1aa4.ctex
+Completed load for: 'res://assets/rifle_Grip polymer albedo.png' remapped 'res://assets/rifle_Grip polymer albedo.png' at thread -1
+Loading resource: res://assets/rifle_Olive ripstop albedo.png remapped: res://assets/rifle_Olive ripstop albedo.png
+Loading resource: res://.godot/imported/rifle_Olive ripstop albedo.png-092e2934bae1166450d1225c7924940d.ctex remapped: res://.godot/imported/rifle_Olive ripstop albedo.png-092e2934bae1166450d1225c7924940d.ctex
+Completed load for: 'res://assets/rifle_Olive ripstop albedo.png' remapped 'res://assets/rifle_Olive ripstop albedo.png' at thread -1
+Loading resource: res://assets/rifle_Suede gloves albedo.png remapped: res://assets/rifle_Suede gloves albedo.png
+Loading resource: res://.godot/imported/rifle_Suede gloves albedo.png-286058b1c065b83d5e827a90471a3c1e.ctex remapped: res://.godot/imported/rifle_Suede gloves albedo.png-286058b1c065b83d5e827a90471a3c1e.ctex
+Completed load for: 'res://assets/rifle_Suede gloves albedo.png' remapped 'res://assets/rifle_Suede gloves albedo.png' at thread -1
+Completed load for: 'res://assets/rifle.glb' remapped 'res://assets/rifle.glb' at thread -1
+Loading resource: res://assets/fonts/NotoSansCJK-Regular.ttc remapped: res://assets/fonts/NotoSansCJK-Regular.ttc
+Loading resource: res://.godot/imported/NotoSansCJK-Regular.ttc-bf6a5134ec173401ff9bd69115e437ec.fontdata remapped: res://.godot/imported/NotoSansCJK-Regular.ttc-bf6a5134ec173401ff9bd69115e437ec.fontdata
+Completed load for: 'res://assets/fonts/NotoSansCJK-Regular.ttc' remapped 'res://assets/fonts/NotoSansCJK-Regular.ttc' at thread -1
+Completed load for: 'res://scripts/game.gd' remapped 'res://scripts/game.gd' at thread -1
+Completed load for: 'res://main.tscn' remapped 'res://main.tscn' at thread -1
+Loading resource: res://assets/materials/beige_wall_001_albedo.jpg remapped: res://assets/materials/beige_wall_001_albedo.jpg
+Loading resource: res://.godot/imported/beige_wall_001_albedo.jpg-d25de8f70cfe3dde063c7255771e6523.ctex remapped: res://.godot/imported/beige_wall_001_albedo.jpg-d25de8f70cfe3dde063c7255771e6523.ctex
+Completed load for: 'res://assets/materials/beige_wall_001_albedo.jpg' remapped 'res://assets/materials/beige_wall_001_albedo.jpg' at thread -1
+Loading resource: res://assets/materials/beige_wall_001_normal.jpg remapped: res://assets/materials/beige_wall_001_normal.jpg
+Loading resource: res://.godot/imported/beige_wall_001_normal.jpg-5a894e095d910d0fce530047efc52ad5.ctex remapped: res://.godot/imported/beige_wall_001_normal.jpg-5a894e095d910d0fce530047efc52ad5.ctex
+Completed load for: 'res://assets/materials/beige_wall_001_normal.jpg' remapped 'res://assets/materials/beige_wall_001_normal.jpg' at thread -1
+Loading resource: res://assets/materials/beige_wall_001_roughness.jpg remapped: res://assets/materials/beige_wall_001_roughness.jpg
+Loading resource: res://.godot/imported/beige_wall_001_roughness.jpg-a2363ae6be312667d3a321c3e0e37ee6.ctex remapped: res://.godot/imported/beige_wall_001_roughness.jpg-a2363ae6be312667d3a321c3e0e37ee6.ctex
+Completed load for: 'res://assets/materials/beige_wall_001_roughness.jpg' remapped 'res://assets/materials/beige_wall_001_roughness.jpg' at thread -1
+Loading resource: res://assets/materials/sandy_gravel_02_albedo.jpg remapped: res://assets/materials/sandy_gravel_02_albedo.jpg
+Loading resource: res://.godot/imported/sandy_gravel_02_albedo.jpg-ce34a74b3842d979135a5b33063e1aa6.ctex remapped: res://.godot/imported/sandy_gravel_02_albedo.jpg-ce34a74b3842d979135a5b33063e1aa6.ctex
+Completed load for: 'res://assets/materials/sandy_gravel_02_albedo.jpg' remapped 'res://assets/materials/sandy_gravel_02_albedo.jpg' at thread -1
+Loading resource: res://assets/materials/sandy_gravel_02_normal.jpg remapped: res://assets/materials/sandy_gravel_02_normal.jpg
+Loading resource: res://.godot/imported/sandy_gravel_02_normal.jpg-44d64ff8b0db3df9706c7a0b88db93f9.ctex remapped: res://.godot/imported/sandy_gravel_02_normal.jpg-44d64ff8b0db3df9706c7a0b88db93f9.ctex
+Completed load for: 'res://assets/materials/sandy_gravel_02_normal.jpg' remapped 'res://assets/materials/sandy_gravel_02_normal.jpg' at thread -1
+Loading resource: res://assets/materials/sandy_gravel_02_roughness.jpg remapped: res://assets/materials/sandy_gravel_02_roughness.jpg
+Loading resource: res://.godot/imported/sandy_gravel_02_roughness.jpg-306c4616419dd6bc989df827f5ec7d2c.ctex remapped: res://.godot/imported/sandy_gravel_02_roughness.jpg-306c4616419dd6bc989df827f5ec7d2c.ctex
+Completed load for: 'res://assets/materials/sandy_gravel_02_roughness.jpg' remapped 'res://assets/materials/sandy_gravel_02_roughness.jpg' at thread -1
+Loading resource: res://assets/audio/rifle_shot.wav remapped: res://assets/audio/rifle_shot.wav
+Loading resource: res://.godot/imported/rifle_shot.wav-710bde57ab5392ff7dff85c4c2e6d3ff.sample remapped: res://.godot/imported/rifle_shot.wav-710bde57ab5392ff7dff85c4c2e6d3ff.sample
+Completed load for: 'res://assets/audio/rifle_shot.wav' remapped 'res://assets/audio/rifle_shot.wav' at thread -1
+Loading resource: res://assets/audio/pistol_shot.wav remapped: res://assets/audio/pistol_shot.wav
+Loading resource: res://.godot/imported/pistol_shot.wav-7f1edbc6bdfcb1d9a2e828e123287b2e.sample remapped: res://.godot/imported/pistol_shot.wav-7f1edbc6bdfcb1d9a2e828e123287b2e.sample
+Completed load for: 'res://assets/audio/pistol_shot.wav' remapped 'res://assets/audio/pistol_shot.wav' at thread -1
+Loading resource: res://assets/audio/rifle_reload.wav remapped: res://assets/audio/rifle_reload.wav
+Loading resource: res://.godot/imported/rifle_reload.wav-860c9bd6a3c153dedd7ea3bc978be327.sample remapped: res://.godot/imported/rifle_reload.wav-860c9bd6a3c153dedd7ea3bc978be327.sample
+Completed load for: 'res://assets/audio/rifle_reload.wav' remapped 'res://assets/audio/rifle_reload.wav' at thread -1
+Loading resource: res://assets/audio/pistol_reload.wav remapped: res://assets/audio/pistol_reload.wav
+Loading resource: res://.godot/imported/pistol_reload.wav-4cf96a70150263ad2258fe20a7ff0979.sample remapped: res://.godot/imported/pistol_reload.wav-4cf96a70150263ad2258fe20a7ff0979.sample
+Completed load for: 'res://assets/audio/pistol_reload.wav' remapped 'res://assets/audio/pistol_reload.wav' at thread -1
+Loading resource: res://assets/audio/step0.wav remapped: res://assets/audio/step0.wav
+Loading resource: res://.godot/imported/step0.wav-edd38b07c55e539c69048d240711cb66.sample remapped: res://.godot/imported/step0.wav-edd38b07c55e539c69048d240711cb66.sample
+Completed load for: 'res://assets/audio/step0.wav' remapped 'res://assets/audio/step0.wav' at thread -1
+Loading resource: res://assets/audio/step1.wav remapped: res://assets/audio/step1.wav
+Loading resource: res://.godot/imported/step1.wav-984faedba0d138303a01f75e56501959.sample remapped: res://.godot/imported/step1.wav-984faedba0d138303a01f75e56501959.sample
+Completed load for: 'res://assets/audio/step1.wav' remapped 'res://assets/audio/step1.wav' at thread -1
+Loading resource: res://assets/audio/step2.wav remapped: res://assets/audio/step2.wav
+Loading resource: res://.godot/imported/step2.wav-82624fbcf2f2c3fad967037a6d4c98dc.sample remapped: res://.godot/imported/step2.wav-82624fbcf2f2c3fad967037a6d4c98dc.sample
+Completed load for: 'res://assets/audio/step2.wav' remapped 'res://assets/audio/step2.wav' at thread -1
+Loading resource: res://assets/sidearm.glb remapped: res://assets/sidearm.glb
+Loading resource: res://.godot/imported/sidearm.glb-de7c33d9b1dec0b6e934a8cf33a87288.scn remapped: res://.godot/imported/sidearm.glb-de7c33d9b1dec0b6e934a8cf33a87288.scn
+Loading resource: res://assets/sidearm_Parkerized steel albedo.png remapped: res://assets/sidearm_Parkerized steel albedo.png
+Loading resource: res://.godot/imported/sidearm_Parkerized steel albedo.png-b9c77f32db4a524637ace635054f62eb.ctex remapped: res://.godot/imported/sidearm_Parkerized steel albedo.png-b9c77f32db4a524637ace635054f62eb.ctex
+Completed load for: 'res://assets/sidearm_Parkerized steel albedo.png' remapped 'res://assets/sidearm_Parkerized steel albedo.png' at thread -1
+Loading resource: res://assets/sidearm_Grip polymer albedo.png remapped: res://assets/sidearm_Grip polymer albedo.png
+Loading resource: res://.godot/imported/sidearm_Grip polymer albedo.png-5125b85120c296d7f2a99de3985e7dfa.ctex remapped: res://.godot/imported/sidearm_Grip polymer albedo.png-5125b85120c296d7f2a99de3985e7dfa.ctex
+Completed load for: 'res://assets/sidearm_Grip polymer albedo.png' remapped 'res://assets/sidearm_Grip polymer albedo.png' at thread -1
+Loading resource: res://assets/sidearm_Olive ripstop albedo.png remapped: res://assets/sidearm_Olive ripstop albedo.png
+Loading resource: res://.godot/imported/sidearm_Olive ripstop albedo.png-2f2d59ea3766cb985667adffaa26e1ba.ctex remapped: res://.godot/imported/sidearm_Olive ripstop albedo.png-2f2d59ea3766cb985667adffaa26e1ba.ctex
+Completed load for: 'res://assets/sidearm_Olive ripstop albedo.png' remapped 'res://assets/sidearm_Olive ripstop albedo.png' at thread -1
+Loading resource: res://assets/sidearm_Suede gloves albedo.png remapped: res://assets/sidearm_Suede gloves albedo.png
+Loading resource: res://.godot/imported/sidearm_Suede gloves albedo.png-056fd38e160ac4e14fb18d426fec6d3d.ctex remapped: res://.godot/imported/sidearm_Suede gloves albedo.png-056fd38e160ac4e14fb18d426fec6d3d.ctex
+Completed load for: 'res://assets/sidearm_Suede gloves albedo.png' remapped 'res://assets/sidearm_Suede gloves albedo.png' at thread -1
+Completed load for: 'res://assets/sidearm.glb' remapped 'res://assets/sidearm.glb' at thread -1
+PASS player capsule rests on ground
+PASS valid spawn (0.0, 0.0, 23.0)
+PASS valid spawn (11.0, 0.0, 23.0)
+PASS valid spawn (-10.0, 0.0, 17.0)
+PASS valid spawn (1.0, 0.0, -11.0)
+PASS valid spawn (11.0, 0.0, 2.0)
+PASS valid spawn (-1.0, 0.0, 5.0)
+PASS valid spawn (5.0, 0.0, -26.0)
+PASS valid spawn (3.0, 0.0, -27.0)
+PASS valid spawn (1.0, 0.0, 11.0)
+PASS valid spawn (14.0, 0.0, -2.0)
+PASS navigation connects spawn to far lane through arch
+PASS navigation finds route around buildings
+PASS arch opening allows sight
+PASS arch masonry blocks bullets
+PASS building blocks sight
+PASS W moves forward with physical velocity
+PASS player cannot walk through a building
+PASS jump leaves the floor
+PASS jump lands without falling through ground
+PASS crouch changes actual collider
+PASS standing restores collider
+PASS reload respects reserve and magazine capacity
+PASS quick shot then reload is preserved
+PASS weapon switch cancels reload
+PASS pistol remains semi automatic when held
+PASS spawn protection prevents damage
+PASS armor absorbs a bounded share of damage
+PASS pause freezes gameplay and reload timers
+PASS bot detects an unobstructed player in field of view
+PASS bot cannot see through the back of its head
+PASS bot cannot detect player through masonry
+PASS sound memory does not track unseen player position
+PASS enemy burst consumes ammunition
+PASS enemy muzzle ray blocks shots through walls
+PASS lethal damage enters respawn countdown
+PASS player respawns with protection
+PASS death only scores once and releases collision
+PASS bot 0 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS bot 1 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS bot 2 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS bot 3 patrol traverses map (134 m)
+PASS bot remains inside map
+PASS player hitscan deals rifle body damage through native physics
+PASS player bullet cannot penetrate building
+PASS live AI engages player with bursts (47 shots)
+PASS live enemy rays can defeat and respawn the player
+PASS live AI reaches cover and peeks during combat
+PASS live AI reloads after consuming magazine
+REGRESSION_RESULT 52 passed / 0 failed; patrol distance 536.218702805229
+WARNING: 11 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)
+ERROR: 3 resources still in use at exit.
+   at: clear (core/io/resource.cpp:817)
+XR: Clearing primary interface
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+Leaked instance: AudioStreamWAV:9223372109097471458 - Reference count: 5
+Leaked instance: AudioStreamWAV:9223372109265243619 - Reference count: 2
+Leaked instance: AudioStreamWAV:9223372109433015780 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372740726099941 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372740440887278 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372741380411382 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372741497851900 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372742554816513 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372742152163338 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372743343345679 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372743947325457 - Reference count: 1
+Hint: Leaked instances typically happen when nodes are removed from the scene tree (with `remove_child()`) but not freed (with `free()` or `queue_free()`).
+Resource still in use: res://assets/audio/step0.wav (AudioStreamWAV)
+Resource still in use: res://assets/audio/step1.wav (AudioStreamWAV)
+Resource still in use: res://assets/audio/step2.wav (AudioStreamWAV)
+Orphan StringName: Master (static: 0, total: 14)
+StringName: 1 unclaimed string names at exit.

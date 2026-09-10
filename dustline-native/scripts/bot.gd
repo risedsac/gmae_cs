@@ -1,0 +1,354 @@
+extends CharacterBody3D
+
+const PATROLS = [Vector3(0,0,18),Vector3(11,0,7),Vector3(3,0,-12),Vector3(4,0,-25),Vector3(-2,0,-13),Vector3(-10,0,12),Vector3(10,0,25)]
+const W=preload("res://scripts/weapons.gd")
+var game
+var team=1
+var target_actor
+var protection=0.
+var kit=true
+var route_stage=0
+var score_kills=0
+var score_deaths=0
+var weapon=0
+var grenades={"he":1,"smoke":1}
+var utility_clock=8.
+var friendly_label: Label3D
+var index=0
+var callsign="VIPER"
+var hp=100
+var ammo=30
+var state="patrol"
+var last_known=Vector3.ZERO
+var memory=0.
+var visible_target=false
+var reaction=0.
+var cooldown=0.
+var reload_left=0.
+var death_left=0.
+var sense_clock=0.
+var route_clock=0.
+var report_clock=0.
+var points: Array[Vector3]=[]
+var goal=Vector3.ZERO
+var patrol_index=0
+var cover: Array=[]
+var hold=0.
+var burst=0
+var stuck=0.
+var previous=Vector3.ZERO
+var model: Node3D
+var gun: Node3D
+var anim: AnimationPlayer
+var clips={}
+var step_clock=0.
+var muzzle_flash: OmniLight3D
+var flash_clock=0.
+var heard_marker=0.
+var shot_count=0
+var combat_goal=Vector3.ZERO
+var evade_left=0.
+var aim_time=0.
+var pose_modifier
+var travel_heading=0.
+var locomotion_speed=0.
+var death_time=0.
+var death_direction=1.
+var aim_pitch=0.
+var weapon_kick=0.
+var navigation_distance=0.
+var previous_yaw=0.
+
+func _ready():
+	collision_layer=4;collision_mask=1|2|4;floor_snap_length=.25
+	var c=CollisionShape3D.new();var shape=CapsuleShape3D.new();shape.radius=.30;shape.height=1.82
+	c.shape=shape;c.position.y=.91;add_child(c)
+	model=preload("res://assets/operator.glb").instantiate();add_child(model)
+	for node in model.find_children("*","AnimationPlayer",true,false):anim=node;break
+	if anim:
+		for clip in anim.get_animation_list():
+			for kind in ["Idle","Walk","Run"]:
+				if kind.to_lower() in clip.to_lower():
+					clips[kind]=clip;anim.get_animation(clip).loop_mode=Animation.LOOP_LINEAR
+	for s in model.find_children("*","Skeleton3D",true,false):
+		pose_modifier=preload("res://scripts/armed_pose.gd").new();pose_modifier.actor=self;s.add_child(pose_modifier)
+	gun=preload("res://assets/rifle.glb").instantiate();add_child(gun)
+	gun.scale=Vector3.ONE*.58;gun.position=Vector3(.10,1.27,-.23)
+	for node in gun.find_children("*","Node3D",true,false):
+		if node.name.begins_with("MainArm") or node.name.begins_with("SupportArm"):node.visible=false
+	muzzle_flash=OmniLight3D.new();muzzle_flash.position=Vector3(.1,1.28,-1.04)
+	muzzle_flash.light_color=Color(1,.65,.2);muzzle_flash.omni_range=2;muzzle_flash.light_energy=0;add_child(muzzle_flash)
+	reset_at(global_position)
+
+func reset_at(pos: Vector3):
+	global_position=pos+Vector3.UP*.07;hp=100;protection=0;ammo=30;state="patrol";memory=0;reload_left=0
+	death_left=0;visible_target=false;reaction=0;cover=[];points=[];goal=pos;target_actor=null;route_stage=0;grenades={"he":1,"smoke":1};utility_clock=8+index*.5
+	sense_clock=index*.035;patrol_index=(index*2)%PATROLS.size();route_clock=0;cooldown=.7
+	report_clock=0;hold=0;burst=0;stuck=0;velocity=Vector3.ZERO;previous=global_position
+	model.rotation=Vector3.ZERO;model.position=Vector3.ZERO;model.visible=true;death_time=0;weapon_kick=0;aim_time=0;evade_left=0;combat_goal=pos;locomotion_speed=0;navigation_distance=0;
+	if is_instance_valid(friendly_label):friendly_label.visible=team==game.player_team
+	gun.visible=true;collision_layer=4;collision_mask=1|2|4
+	rotation.y=0 if team==0 else PI
+	if anim and clips.has("Idle"):anim.play(clips["Idle"],.0)
+
+func hear(pos: Vector3,strength=7.):
+	if hp<=0 or visible_target:return
+	last_known=pos;memory=strength
+	if state=="patrol":state="search";route_clock=0
+
+func set_team_appearance():
+	if is_instance_valid(gun):gun.queue_free()
+	weapon=0 if team==0 else 2
+	gun=W.make(weapon);add_child(gun);gun.scale=Vector3.ONE*.58;gun.position=Vector3(.10,1.27,-.23)
+	for node in gun.find_children("*","Node3D",true,false):
+		if node.name.begins_with("MainArm") or node.name.begins_with("SupportArm"):node.visible=false
+	for mesh in model.find_children("*","MeshInstance3D",true,false):
+		for i in mesh.mesh.get_surface_count():
+			var original=mesh.mesh.surface_get_material(i)
+			if original and ("uniform" in original.resource_name.to_lower() or "navy" in original.resource_name.to_lower()):
+				var material_=original.duplicate();material_.albedo_color=Color(.62,.47,.29) if team==0 else Color(.22,.35,.47)
+				mesh.set_surface_override_material(i,material_)
+	if not is_instance_valid(friendly_label):
+		friendly_label=Label3D.new();add_child(friendly_label);friendly_label.position.y=2.08
+		friendly_label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;friendly_label.font_size=22;friendly_label.pixel_size=.008;friendly_label.no_depth_test=false
+	friendly_label.text=callsign;friendly_label.modulate=Color(.4,.8,1);friendly_label.visible=team==game.player_team
+
+func see_actor(actor) -> bool:
+	if actor.hp<=0 or actor.team==team or actor.protection>0:return false
+	var eye=actor.global_position+Vector3.UP*(1.1 if actor==game.player and actor.crouched else 1.55)
+	var to=eye-(global_position+Vector3.UP*1.55)
+	if to.length()>40:return false
+	var flat=Vector3(to.x,0,to.z).normalized()
+	var fov=140. if memory>0 else 110.
+	if (-global_basis.z).dot(flat)<cos(deg_to_rad(fov/2)):return false
+	return game.clear_sight(global_position+Vector3.UP*1.55,eye)
+
+func sense():
+	# Keep the acquired opponent unless another is substantially closer.
+	var nearest=target_actor if is_instance_valid(target_actor) and see_actor(target_actor) else null
+	var distance=global_position.distance_to(nearest.global_position)*.72 if nearest else INF
+	for actor in game.actors():
+		if see_actor(actor) and actor.global_position.distance_to(global_position)<distance:
+			nearest=actor;distance=actor.global_position.distance_to(global_position)
+	var seen=is_instance_valid(nearest)
+	if seen:
+		last_known=nearest.global_position;memory=7.
+		if not visible_target or target_actor!=nearest:reaction=[.85,.52,.32][game.difficulty];aim_time=0
+		target_actor=nearest
+		if state in ["patrol","search"]:state="engage";route_clock=0
+		if report_clock<=0:
+			report_clock=2.5
+			for ally in game.bots:
+				if ally!=self and ally.team==team and ally.global_position.distance_to(global_position)<18:ally.hear(last_known,4.)
+	visible_target=seen
+
+func choose_cover():
+	var best=INF;var choice=[]
+	for pair in game.world.cover_pairs:
+		var hide: Vector3=pair[0];var peek: Vector3=pair[1]
+		var distance=global_position.distance_to(hide)
+		if distance>9 or distance<.2 or not game.world.walkable(hide) or not game.world.walkable(peek):continue
+		if game.clear_sight(hide+Vector3.UP*1.5,last_known+Vector3.UP*1.4):continue
+		if not game.clear_sight(peek+Vector3.UP*1.5,last_known+Vector3.UP*1.4):continue
+		var occupied=false
+		for ally in game.bots:
+			if ally!=self and ally.team==team and ally.hp>0 and not ally.cover.is_empty() and ally.cover[0].distance_to(hide)<2:occupied=true;break
+		if occupied:continue
+		var route=game.world.path(global_position,hide)
+		if route.is_empty() or route.size()*.5>distance*1.8+2:continue
+		if distance<best:best=distance;choice=pair
+	if not choice.is_empty():cover=choice;state="cover";hold=0;route_clock=0
+
+func _physics_process(dt):
+	if not game.active:return
+	heard_marker=maxf(0,heard_marker-dt)
+	if hp<=0:
+		death_time+=dt
+		# Settle hips first, then roll onto the shoulder; avoid a rigid plank pivot at the feet.
+		var t=clampf(death_time/.72,0,1);var settle=t*t*(3-2*t)
+		model.rotation.x=settle*1.43
+		model.rotation.z=sin(t*PI)*.22*death_direction
+		model.position=Vector3(0,settle*.16,settle*.28)
+		return
+	if game.phase not in ["live","planted"]:
+		if anim and clips.has("Idle") and anim.current_animation!=clips.Idle:anim.play(clips.Idle,.12)
+		velocity=Vector3.ZERO
+		if not is_on_floor():velocity.y=-2;move_and_slide()
+		return
+	utility_clock-=dt;evade_left=maxf(0,evade_left-dt);weapon_kick=move_toward(weapon_kick,0,dt*5)
+	aim_time=aim_time+dt if visible_target else 0.
+	memory=maxf(0,memory-dt);reaction=maxf(0,reaction-dt);cooldown=maxf(0,cooldown-dt)
+	report_clock-=dt;route_clock-=dt;sense_clock-=dt;step_clock-=dt
+	flash_clock=maxf(0,flash_clock-dt);muzzle_flash.light_energy=2. if flash_clock>0 else 0.
+	if reload_left>0:
+		reload_left=maxf(0,reload_left-dt)
+		if reload_left==0:ammo=30;burst=0
+	if sense_clock<=0:sense_clock=.13;sense()
+	if game.bot_interaction(self,dt):
+		if anim and clips.has("Idle") and anim.current_animation!=clips.Idle:anim.play(clips.Idle,.12)
+		return
+	# Only commit a HE when its landing area is clear of teammates. Smoke is reserved for reloads/retakes.
+	if utility_clock<=0 and visible_target and is_instance_valid(target_actor) and velocity.length()<.6:
+		var distance=global_position.distance_to(last_known)
+		var safe=true
+		for ally in game.team_alive(team):
+			if ally.global_position.distance_to(last_known)<7:safe=false
+		if distance>9 and distance<17 and safe and grenades.he>0:
+			var origin=global_position+Vector3.UP*1.5
+			game.throw_grenade(self,"he",grenade_direction(last_known,origin),origin);utility_clock=16
+		elif reload_left>0 and grenades.smoke>0 and distance>12:
+			game.throw_grenade(self,"smoke",(last_known-global_position).normalized()*.7+Vector3.UP*.2,global_position+Vector3.UP*1.4);utility_clock=16
+	if memory==0 and not visible_target:state="patrol";cover=[]
+	var desired=global_position
+	var move_speed=2.25
+	if state=="patrol":
+		desired=game.objective_for(self);move_speed=3.35
+	elif state=="search":
+		desired=last_known;move_speed=2.8
+		if flat_distance(desired)<1.2:
+			rotate_y(dt*.65)
+			if memory<2:state="patrol"
+	elif not cover.is_empty():
+		desired=cover[0] if state=="cover" else cover[1];move_speed=2.4
+		# Hold duration begins upon reaching cover, never while still navigating to it.
+		if flat_distance(desired)<.40:
+			hold+=dt
+			if state=="cover" and hold>(.7 if reload_left<=0 else 2.5):state="peek";hold=0;route_clock=0
+			elif state=="peek" and hold>1.15:state="cover";hold=0;route_clock=0
+	else:
+		if not visible_target:state="search";desired=last_known
+		elif evade_left>0:
+			desired=combat_goal;move_speed=2.0
+	if reload_left>0 and not cover.is_empty():state="cover";desired=cover[0]
+	if evade_left>0 and cover.is_empty():desired=combat_goal
+	var direction=Vector3.ZERO
+	if flat_distance(desired)>.38:
+		if route_clock<=0 or desired.distance_to(goal)>1.2:
+			points=game.world.path(global_position,desired);goal=desired;route_clock=.8+index*.045
+		while not points.is_empty() and flat_distance(points[0])<.4:points.pop_front()
+		# Look ahead only through a capsule-width corridor; never cut a crate corner.
+		while points.size()>1 and global_position.distance_to(points[1])<3.5 and game.world.corridor_clear(global_position,points[1]):points.pop_front()
+		if not points.is_empty():direction=(points[0]-global_position);direction.y=0;direction=direction.normalized()
+	var aim=last_known if visible_target or (memory>0 and direction.length()<.1) else global_position+direction*4
+	var aim_dir=aim-global_position;aim_dir.y=0
+	# Feet and torso turn toward travel while relocating, then acquire aim when planted.
+	var heading_dir=direction if direction.length()>.1 else aim_dir.normalized()
+	if heading_dir.length()>.1:
+		rotation.y=rotate_toward(rotation.y,atan2(-heading_dir.x,-heading_dir.z),dt*5.0)
+	var facing=(-global_basis.z).dot(aim_dir.normalized()) if aim_dir.length()>.1 else 0.
+	var can_shoot=visible_target and is_instance_valid(target_actor) and target_actor.hp>0 and reaction<=0 and facing>cos(.10) and reload_left<=0 and state!="cover" and evade_left<=0
+	if can_shoot and (burst>0 or cooldown<=0):direction=Vector3.ZERO
+	# Separate BEFORE integration. The lower priority actor yields at narrow doors.
+	var separation=Vector3.ZERO
+	for ally in game.actors():
+		if ally==self or ally.hp<=0:continue
+		var away=global_position-ally.global_position;away.y=0
+		var distance=away.length()
+		if distance>.01 and distance<1.25:
+			separation+=away.normalized()*(1.25-distance)*1.8
+			if direction.dot(-away.normalized())>.6 and distance<.95:
+				var side=Vector3(-direction.z,0,direction.x)
+				if game.world.corridor_clear(global_position,global_position+side*.8):separation+=side*1.4
+				elif ally==game.player or ally.index<index:move_speed*=.2
+	if direction.length()>.1:
+		var steer=(direction+separation).normalized()
+		if game.world.corridor_clear(global_position,global_position+steer*.5):direction=steer
+	velocity.x=move_toward(velocity.x,direction.x*move_speed,dt*10)
+	velocity.z=move_toward(velocity.z,direction.z*move_speed,dt*10)
+	# Brake at large heading changes instead of skating sideways during a run clip.
+	if direction.length()>.1 and (-global_basis.z).dot(direction)<.45:
+		velocity.x*=.7;velocity.z*=.7
+	if not is_on_floor():velocity.y-=22*dt
+	move_and_slide()
+	var moved=global_position.distance_to(previous);navigation_distance+=moved
+	if direction.length()>.1 and moved<dt*.2:stuck+=dt
+	else:stuck=maxf(0,stuck-dt*2)
+	previous=global_position
+	if stuck>.65:
+		for sign_ in [1.,-1.]:
+			var escape=global_position+Vector3(-direction.z,0,direction.x)*sign_*1.2
+			if game.world.corridor_clear(global_position,escape):
+				combat_goal=escape;evade_left=.7;points.assign([escape]);route_clock=.7;break
+		stuck=0
+	update_pose(dt)
+	if can_shoot and cooldown<=0 and Vector2(velocity.x,velocity.z).length()<.45:shoot()
+	if ammo<=0 and reload_left<=0:
+		reload_left=2.35;game.sound.play_at("rifle_reload",global_position+Vector3.UP,-19)
+		if not cover.is_empty():state="cover";hold=0;route_clock=0
+	var speed=Vector2(velocity.x,velocity.z).length()
+	if speed>.5 and step_clock<=0:
+		step_clock=.34 if speed>2.7 else .49;game.sound.play_at("step"+str(randi()%6),global_position,-23)
+	locomotion_speed=lerpf(locomotion_speed,speed,1-exp(-dt*10))
+	var clip="Run" if locomotion_speed>2.75 else ("Walk" if locomotion_speed>.2 else "Idle")
+	if anim and clips.has(clip):
+		if anim.current_animation!=clips[clip]:anim.play(clips[clip],.25)
+		anim.speed_scale=clampf(locomotion_speed/(3.4 if clip=="Run" else 1.65),.45,1.35) if clip!="Idle" else 1.
+
+func shoot():
+	if ammo<=0 or not visible_target or not is_instance_valid(target_actor) or target_actor.hp<=0:return
+	var from=muzzle_flash.global_position
+	var target=target_actor.global_position+Vector3.UP*(.76 if target_actor==game.player and target_actor.crouched else 1.05)
+	# A clear eye ray doesn't permit a gun sticking through the corner to fire.
+	if not game.clear_sight(global_position+Vector3.UP*1.4,from) or not game.clear_sight(from,target):return
+	var spread=[.033,.021,.013][game.difficulty]*(1.+maxf(0,1.-aim_time)*.65)+burst*.0015
+	var dir=(target-from).normalized();dir=(dir+Vector3(randfn(0,spread),randfn(0,spread),randfn(0,spread))).normalized()
+	var hit=game.ray(from,from+dir*60,1|2|4,[get_rid()])
+	var end=from+dir*60 if hit.is_empty() else hit.position
+	if not hit.is_empty() and hit.collider.has_method("take_damage"):
+		if hit.collider.team==team:
+			cooldown=.24;burst=0;pick_combat_step();return
+		hit.collider.take_damage(randi_range(23,30),false,self)
+	game.tracer(from,end,Color(1,.56,.21));game.sound.play_at(W.DATA[weapon].sound,from,-10);game.noise(global_position,40,self)
+	ammo-=1;shot_count+=1;flash_clock=.045;heard_marker=1.2;burst+=1;weapon_kick=1.;cooldown=W.DATA[weapon].interval
+	if burst>=[3,3,4][game.difficulty]:
+		burst=0;cooldown=[1.05,.72,.52][game.difficulty]+randf_range(-.08,.15)
+		if cover.is_empty() and randf()<.55:pick_combat_step()
+
+func flat_distance(pos: Vector3) -> float:
+	return Vector2(pos.x-global_position.x,pos.z-global_position.z).length()
+
+func take_damage(amount: int,head=false,source=null):
+	if hp<=0 or not game.active or game.phase not in ["live","planted"]:return
+	if is_instance_valid(source) and source.team==team:return
+	hp=maxi(0,hp-amount)
+	if is_instance_valid(source):hear(source.global_position)
+	if hp==0:
+		collision_layer=0;collision_mask=0;gun.visible=false;muzzle_flash.light_energy=0;velocity=Vector3.ZERO
+		if is_instance_valid(friendly_label):friendly_label.visible=false
+		death_direction=1. if index%2 else -1.
+		if anim:anim.pause()
+		game.actor_died(self,source,head)
+	elif hp<75 and cover.is_empty():choose_cover()
+
+func pick_combat_step():
+	var side=global_basis.x*(1. if index%2 else -1.)
+	for sign_ in [1.,-1.]:
+		var p=global_position+side*sign_*1.3
+		if game.world.corridor_clear(global_position,p):combat_goal=p;evade_left=.65;route_clock=0;return
+
+func update_pose(dt: float):
+	var horizontal=Vector2(velocity.x,velocity.z).length()
+	var turn_rate=clampf(wrapf(rotation.y-previous_yaw,-PI,PI)/maxf(dt,.001),-3.,3.);previous_yaw=rotation.y
+	model.rotation.z=lerpf(model.rotation.z,-turn_rate*.018,1-exp(-dt*7))
+	model.rotation.x=lerpf(model.rotation.x,horizontal*.009,1-exp(-dt*7))
+	var rel=to_local(last_known+Vector3.UP*1.35)-Vector3(0,1.35,0)
+	var aim_yaw=clampf(atan2(-rel.x,-rel.z),-.65,.65) if visible_target else 0.
+	var tilt=atan2(rel.y,maxf(.1,Vector2(rel.x,rel.z).length())) if visible_target else -.08
+	aim_pitch=lerpf(aim_pitch,clampf(tilt,-.45,.45),1-exp(-dt*9))
+	gun.rotation=gun.rotation.lerp(Vector3(aim_pitch,aim_yaw,0),1-exp(-dt*12))
+	var bob_=sin(navigation_distance*7)*.009*minf(horizontal,1.)
+	gun.position=Vector3(.10,1.27+bob_,-.23+weapon_kick*.025)
+	if reload_left>0:
+		gun.rotation.z-=sin((1-reload_left/2.35)*PI)*.3
+		gun.position.y-=.06
+	muzzle_flash.global_position=gun.to_global(Vector3(0,.005,-1.4))
+
+func grenade_direction(target: Vector3,origin: Vector3) -> Vector3:
+	var delta=target-origin;delta.y=0
+	var distance=delta.length();var best=INF;var angle=0.
+	for i in range(-35,66):
+		var pitch_=i*.01;var vertical=sin(pitch_)*13+3.4
+		var flight=(vertical+sqrt(vertical*vertical+2*9.8*maxf(.1,origin.y-target.y)))/9.8
+		var error=absf(cos(pitch_)*13*flight-distance)
+		if error<best:best=error;angle=pitch_
+	return delta.normalized()*cos(angle)+Vector3.UP*sin(angle)

@@ -1,0 +1,8 @@
+DUSTLINE modeling and AI pass
+Source: d9297be4f41b4de2bda03ee388127ff34e1cba97
+19 Node regression checks passed, including real GLB animated bounds, animation pivots, visibility, fixed sound memory, finite enemy magazines, no fire through walls, and a full cover/peek/fire cycle.
+TypeScript and scoped source/test lint passed. Production build passed.
+Blender 5.2.1 generated rifle.glb, sidearm.glb and operator.glb. Studio renders inspected. Operator is original uniform and equipment on the attributed existing Mixamo rig.
+Hidden in-app browser: ready state freezes the round, explicit drag mode starts gameplay, quick shot + R completes 29/90 to 30/89, weapon swap shows 12/48 pistol, movement and Escape pause work. Model proportions and support-hand grip visually inspected. Saw bots firing from edges of crate cover. Updated lighting produces directional street shadows.
+One Vite hot-reload invalid-hook error occurred immediately after adding next/link. A complete reload recovered, and final fresh-load gameplay had no new console errors. Native pointer-lock success was not testable in the hidden in-app browser; rejection and fallback behavior were verified.
+No visible browser was opened. Final deployment is owner-only. Model archive in outputs includes two editable .blend files and Chinese notes.

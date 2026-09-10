@@ -1,0 +1,88 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS exactly 5v5 including player and four teammates
+PASS attacker player starts carrying C4
+PASS spawn outside solids: Player
+PASS spawn outside solids: VIPER
+PASS spawn outside solids: NOMAD
+PASS spawn outside solids: RAVEN
+PASS spawn outside solids: GHOST
+PASS spawn outside solids: FALCON
+PASS spawn outside solids: COBRA
+PASS spawn outside solids: ATLAS
+PASS spawn outside solids: ECHO
+PASS spawn outside solids: WOLF
+PASS A route segment reachable
+PASS A route segment reachable
+PASS A route segment reachable
+PASS A route segment reachable
+PASS A route segment reachable
+PASS attack route ends inside A plant zone
+PASS B route segment reachable
+PASS B route segment reachable
+PASS B route segment reachable
+PASS B route segment reachable
+PASS B route segment reachable
+PASS B route segment reachable
+PASS attack route ends inside B plant zone
+PASS buy allowed during freeze in own spawn
+PASS freeze blocks movement and shooting
+PASS AK purchase debits correct price and equips
+PASS duplicate primary rejected without charging
+PASS insufficient funds cannot buy sniper
+PASS M4 replaces primary with distinct model and data
+PASS sniper equips five round magazine
+PASS both utility types purchasable
+PASS grenade capacity prevents duplicate purchases
+PASS armor purchase restores armor
+PASS attackers cannot buy defuse kit
+PASS buying outside spawn rejected
+PASS buying after timer rejected
+PASS bullets do not damage teammates
+PASS rifle native hitscan damages hostile actor
+PASS sniper scope changes FOV and hides viewmodel
+PASS switching weapon exits scope
+PASS cannot plant outside bomb sites
+PASS releasing E cancels planting progress
+PASS holding E plants at A site
+PASS planted bomb keeps round alive after attackers eliminated
+PASS C4 detonation awards attack round
+PASS round result cannot score twice
+PASS CT choice assigns bomb to opposing AI
+PASS CT can buy defuse kit
+PASS releasing E cancels defuse
+PASS kit defuse finishes after five seconds
+PASS no-kit defuse does not finish in five seconds
+PASS no-kit defuse finishes in ten seconds
+PASS carrier death drops C4 and does not respawn mid-round
+PASS living teammate picks up dropped C4
+PASS death remains spectating until next round
+PASS new round respawns dead player with economy retained and weapons lost
+PASS unplanted timeout awards defense
+PASS eliminating defenders awards attack
+PASS eliminating attackers before plant awards defense
+PASS throw consumes grenade and creates native rigid body
+PASS cannot throw missing utility
+PASS pause freezes grenade fuse
+PASS HE fuse detonates and removes projectile
+PASS HE applies radial hostile damage
+PASS wall blocks explosion damage
+PASS smoke blocks AI and radar visibility
+PASS smoke does not become bulletproof collision
+PASS enemy cannot detect player through smoke
+PASS smoke expires and removes visibility blocker
+PASS AI perception rejects friendly targets
+PASS scoped sniper shot exits zoom during bolt cycle
+PASS sniper returns to scope after bolt cycle
+PASS sniper reload cancels scope
+PASS sniper reload respects reserve ammunition
+PASS M4 automatic fire uses its own cadence
+PASS master bus has a peak limiter for overlapping shots
+PASS attacking AI independently plants at B
+PASS defending teammate AI defuses even inside smoke
+PASS surviving player keeps weapons and unused utility
+PASS first five rounds ends match and opens result menu
+PASS both-team AI simulation produces combat (69 shots)
+PASS AI agents traverse attack and defense routes
+AI_OBJECTIVE_OBSERVED true phase=freeze reason=
+DEMOLITION_RESULT 84 passed / 0 failed
