@@ -19,6 +19,9 @@ var models: Array[Node3D]=[]
 var magazines: Array=[]
 var hands: Array=[]
 var bolts: Array=[]
+var magazine_base: Array[Vector3]=[]
+var hand_base: Array[Vector3]=[]
+var bolt_base: Array[Vector3]=[]
 var utility_models={}
 var utility_kind=""
 var utility_left=0.
@@ -78,7 +81,9 @@ func build_viewmodel():
 	weapon_anchor=Node3D.new();view.add_child(weapon_anchor)
 	for index in 4:
 		var model=W.make(index);weapon_anchor.add_child(model);model.scale=Vector3.ONE*.78;models.append(model)
-		magazines.append(find_part(model,"Magazine"));hands.append(find_part(model,"SupportArm"));bolts.append(find_part(model,"Bolt"))
+		var magazine=find_part(model,"Magazine");var hand=find_part(model,"SupportArm");var bolt=find_part(model,"Bolt")
+		magazines.append(magazine);hands.append(hand);bolts.append(bolt)
+		magazine_base.append(magazine.position if magazine else Vector3.ZERO);hand_base.append(hand.position if hand else Vector3.ZERO);bolt_base.append(bolt.position if bolt else Vector3.ZERO)
 		for part in model.find_children("*","MeshInstance3D",true,false):part.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for kind in ["he","smoke"]:
 		var utility=W.make_utility(kind);weapon_anchor.add_child(utility);utility_models[kind]=utility;utility.visible=false
@@ -129,15 +134,10 @@ func begin_utility(kind: String):
 
 func update_utility(dt: float):
 	if utility_left<=0:return
-	var utility=utility_models.get(utility_kind)
-	utility_left=maxf(0,utility_left-dt)
-	var t=1.-utility_left/.52
-	if is_instance_valid(utility):
-		utility.position=Vector3(-.055,-.04+sin(minf(t,1.)*PI)*.075,.20-.08*t)
-		utility.rotation.z=.10-t*.42
+	var utility=utility_models.get(utility_kind);utility_left=maxf(0,utility_left-dt);var t=1.-utility_left/.52
+	if is_instance_valid(utility):utility.position=Vector3(-.055,-.04+sin(minf(t,1.)*PI)*.075,.20-.08*t);utility.rotation.z=.10-t*.42
 	if not utility_thrown and utility_left<=.22:
-		var direction=(-camera.global_basis.z+Vector3.UP*.08).normalized()
-		utility_thrown=game.throw_grenade(self,utility_kind,direction,camera.global_position)
+		var direction=(-camera.global_basis.z+Vector3.UP*.08).normalized();utility_thrown=game.throw_grenade(self,utility_kind,direction,camera.global_position)
 		if utility_thrown and is_instance_valid(utility):utility.visible=false
 	if utility_left<=0:
 		for key in utility_models:utility_models[key].visible=false
@@ -193,8 +193,7 @@ func _physics_process(dt):
 	var flat_speed=Vector2(velocity.x,velocity.z).length()
 	if flat_speed>.5 and is_on_floor():
 		bob+=dt*flat_speed*2.4;step_clock-=dt
-		if step_clock<=0:
-			step_clock=.44 if speed>3 else .6;game.sound.local("step"+str(randi()%6),-22 if speed>3 else -32);game.noise(global_position,11. if speed>3 else 2.5,self)
+		if step_clock<=0:step_clock=.44 if speed>3 else .6;game.sound.local("step"+str(randi()%6),-22 if speed>3 else -32);game.noise(global_position,11. if speed>3 else 2.5,self)
 	camera.rotation.x=pitch;game.interact(self,Input.is_action_pressed("interact") and not game.hud.shop.visible,dt)
 	if utility_left<=0 and (shot_queued or (weapon in [0,2] and Input.is_action_pressed("fire"))):fire()
 	shot_queued=false
@@ -232,24 +231,22 @@ func update_view(dt: float,speed: float):
 	recoil=move_toward(recoil,0,dt*2.5);sway=sway.lerp(Vector2.ZERO,minf(1,dt*10));sway=sway.limit_length(.035);camera.rotation.x=pitch
 	camera.fov=25 if scoped and weapon==3 else 80;weapon_anchor.visible=hp>0 and not (scoped and weapon==3)
 	var base=Vector3(.24,-.24,-.47) if weapon!=1 else Vector3(.20,-.16,-.45);var pose=Vector3(.025,.07,-.015)
-	breathing+=dt;motion_blend=lerpf(motion_blend,minf(speed/3.,1.),1-exp(-dt*9))
-	kick_velocity+=(-kick_position*190.-kick_velocity*23.)*dt;kick_position+=kick_velocity*dt
-	base+=Vector3(0,sin(breathing*1.7)*.0025,kick_position.z);pose+=Vector3(kick_position.x,kick_position.y,0)
-	draw_left=maxf(0,draw_left-dt);var draw=draw_left/.28;base.y-=draw*draw*.22;pose.x-=draw*.20
+	breathing+=dt;motion_blend=lerpf(motion_blend,minf(speed/3.,1.),1-exp(-dt*9));kick_velocity+=(-kick_position*190.-kick_velocity*23.)*dt;kick_position+=kick_velocity*dt
+	base+=Vector3(0,sin(breathing*1.7)*.0025,kick_position.z);pose+=Vector3(kick_position.x,kick_position.y,0);draw_left=maxf(0,draw_left-dt);var draw=draw_left/.28;base.y-=draw*draw*.22;pose.x-=draw*.20
 	base+=Vector3(sin(bob*.5)*.006,absf(cos(bob))*.009,0)*motion_blend;base+=Vector3(-sway.x,sway.y,recoil*.035);pose+=Vector3(recoil*.025,-sway.x,-sway.x*.5)
 	for i in 4:
-		if magazines[i]:magazines[i].position=Vector3.ZERO;magazines[i].visible=true
-		if hands[i]:hands[i].position=Vector3.ZERO
-		if bolts[i]:bolts[i].position=Vector3.ZERO
+		if magazines[i]:magazines[i].position=magazine_base[i];magazines[i].visible=true
+		if hands[i]:hands[i].position=hand_base[i]
+		if bolts[i]:bolts[i].position=bolt_base[i]
 	if reload_left>0:
 		var t=1-reload_left/reload_duration;var dip=smoothstep(0.,.15,t)*(1-smoothstep(.82,1.,t));base+=Vector3(-.10,.045,.04)*dip;pose.z-=dip*.43;pose.y-=dip*.12;pose.x+=dip*.04
 		var reach=smoothstep(.10,.27,t)*(1-smoothstep(.76,.96,t));var extract=smoothstep(.27,.44,t)*(1-smoothstep(.52,.74,t));var grip_shift=Vector3(.015,-.15 if weapon!=1 else -.085,[.34,.03,.27,.34][weapon]);var mag_shift=Vector3(-.07,-.40,.10)*extract
-		if magazines[weapon]:magazines[weapon].position=mag_shift;magazines[weapon].visible=not (t>.44 and t<.52)
-		if hands[weapon]:hands[weapon].position=grip_shift*reach+mag_shift
-		if bolts[weapon] and t>.80:bolts[weapon].position.z=sin(clampf((t-.80)/.14,0,1)*PI)*.065
+		if magazines[weapon]:magazines[weapon].position=magazine_base[weapon]+mag_shift;magazines[weapon].visible=not (t>.44 and t<.52)
+		if hands[weapon]:hands[weapon].position=hand_base[weapon]+grip_shift*reach+mag_shift
+		if bolts[weapon] and t>.80:bolts[weapon].position=bolt_base[weapon]+Vector3(0,0,sin(clampf((t-.80)/.14,0,1)*PI)*.065)
 	if weapon==3 and shot_cooldown>0 and reload_left<=0:
 		var cycle=1-shot_cooldown/W.DATA[3].interval;var pull=sin(clampf((cycle-.14)/.62,0,1)*PI)
-		if bolts[3]:bolts[3].position.z=pull*.14
+		if bolts[3]:bolts[3].position=bolt_base[3]+Vector3(0,0,pull*.14)
 		pose.z+=pull*.10;base.y-=pull*.035
 	weapon_anchor.position=base;weapon_anchor.rotation=pose;flash_time=maxf(0,flash_time-dt);flash.light_energy=2.8 if flash_time>0 else 0.
 
