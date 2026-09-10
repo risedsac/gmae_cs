@@ -159,8 +159,7 @@ def main() -> None:
     for material in bpy.data.materials:
         repair_material(material, pngs, source.parent)
 
-    # Put the entire weapon under one authored root, center it, rotate the
-    # Unreal-style +X weapon axis onto Blender +Y, then normalize its length.
+    # Parent every original top-level object beneath a stable export root.
     root = bpy.data.objects.new("SteinWeapon", None)
     bpy.context.scene.collection.objects.link(root)
     for obj in imported:
@@ -171,17 +170,16 @@ def main() -> None:
     center = (minimum + maximum) * 0.5
     longest = max((maximum - minimum).x, (maximum - minimum).y, (maximum - minimum).z)
     scale = target_length / max(longest, 1e-6)
-    root.location = -center
+
+    # Stein targets an Unreal-style +X-forward workflow. Rotate +X onto Blender
+    # +Y (which glTF/Godot presents along -Z), then translate *after* applying
+    # the rotation/scale math so the weapon remains centered. The previous
+    # implementation used -center directly and could throw centimetre-unit FBX
+    # meshes far away from the camera after normalization.
     root.rotation_euler.z = math.radians(90.0)
     root.scale = (scale, scale, scale)
-
-    # Apply the root transform while preserving children so the GLB imports
-    # into Godot with a stable metre-scale hierarchy.
-    bpy.context.view_layer.objects.active = root
-    root.select_set(True)
-    for obj in imported:
-        obj.select_set(False)
-    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    root.location = Vector((center.y * scale, -center.x * scale, -center.z * scale))
+    bpy.context.view_layer.update()
 
     for image in bpy.data.images:
         if image.source == "FILE":
