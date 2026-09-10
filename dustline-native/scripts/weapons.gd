@@ -8,7 +8,72 @@ const DATA=[
 	{"name":"AWP","price":4750,"capacity":5,"reserve":25,"interval":1.4,"reload":3.1,"damage":120,"head":450,"spread":.0004,"kick":.048,"sound":"sniper_shot"}
 ]
 
+# Optional authored replacement visuals from Quaternius Ultimate Guns Pack (CC0).
+# Run tools/install-quaternius-guns.sh to install them. The original Dustline
+# models remain as a fallback so the project still opens when the pack is absent.
+const PACK_ROOT="res://assets/third_party/quaternius/ultimate_guns/"
+const PACK_FILES=["ak74.glb","p226.glb","scarl.glb","awm.glb"]
+const PACK_SCALE=[1.00,1.00,1.00,1.00]
+const PACK_ROTATION=[
+	Vector3(0,PI,0),
+	Vector3(0,PI,0),
+	Vector3(0,PI,0),
+	Vector3(0,PI,0)
+]
+const PACK_OFFSET=[
+	Vector3(0,0,0),
+	Vector3(0,0,0),
+	Vector3(0,0,0),
+	Vector3(0,0,0)
+]
+
 static func make(index: int,generate=false) -> Node3D:
+	if not generate:
+		var upgraded=load_pack_weapon(index)
+		if upgraded:return upgraded
+	return make_legacy(index,generate)
+
+static func load_pack_weapon(index: int) -> Node3D:
+	if index<0 or index>=PACK_FILES.size():return null
+	var path=PACK_ROOT+PACK_FILES[index]
+	if not ResourceLoader.exists(path):return null
+	var scene=load(path)
+	if not scene:return null
+	var visual=scene.instantiate()
+	if not visual:return null
+	var root=Node3D.new();root.name=DATA[index].name
+	visual.name="PackVisual"
+	visual.scale=Vector3.ONE*PACK_SCALE[index]
+	visual.rotation=PACK_ROTATION[index]
+	visual.position=PACK_OFFSET[index]
+	root.add_child(visual)
+	# Keep the existing first-person arms so the new weapon pack improves the
+	# gun silhouettes without throwing away the current hand/reload presentation.
+	var donor=load("res://assets/"+("sidearm" if index==1 else "rifle")+".glb").instantiate()
+	move_arm(donor,root,"MainArm")
+	move_arm(donor,root,"SupportArm")
+	donor.free()
+	# The Quaternius source models are static. Dummy mechanism anchors preserve
+	# the player's existing reload/bolt animation contract without requiring the
+	# source GLBs to be destructively edited.
+	ensure_anchor(root,"Magazine")
+	ensure_anchor(root,"Bolt")
+	return root
+
+static func move_arm(donor: Node3D,root: Node3D,prefix: String):
+	for part in donor.find_children("*","Node3D",true,false):
+		if part.name.begins_with(prefix):
+			part.owner=null
+			part.get_parent().remove_child(part)
+			root.add_child(part)
+			return
+
+static func ensure_anchor(root: Node3D,prefix: String):
+	for part in root.find_children("*","Node3D",true,false):
+		if part.name.begins_with(prefix):return
+	var anchor=Node3D.new();anchor.name=prefix;root.add_child(anchor)
+
+static func make_legacy(index: int,generate=false) -> Node3D:
 	if index>=2 and not generate:return load("res://assets/"+("m4a1" if index==2 else "awp")+".glb").instantiate()
 	if index<2:return load("res://assets/"+("rifle" if index==0 else "sidearm")+".glb").instantiate()
 	var root=Node3D.new();root.name="M4A1" if index==2 else "AWP"
