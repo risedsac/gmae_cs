@@ -4,11 +4,15 @@ set -euo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_ROOT="$ROOT_DIR/assets/third_party/realistic_weapons"
 AUDIO_ROOT="$ROOT_DIR/assets/audio/realistic_weapons"
+SFX_ROOT="$ROOT_DIR/assets/audio/realistic_sfx"
+UTILITY_ROOT="$ROOT_DIR/assets/third_party/realistic_utility"
 STEIN_ROOT="$REAL_ROOT/stein_classic_weapons"
+STEIN_RUNTIME="$REAL_ROOT/stein_runtime"
 GODOT="$ROOT_DIR/engine/Godot.x86_64"
-mkdir -p "$REAL_ROOT/ak47" "$REAL_ROOT/m4a1" "$AUDIO_ROOT"
+mkdir -p "$REAL_ROOT/ak47" "$REAL_ROOT/m4a1" "$REAL_ROOT/fallback" "$AUDIO_ROOT" "$SFX_ROOT" "$UTILITY_ROOT" "$STEIN_RUNTIME"
 
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
+command -v unzip >/dev/null || { echo "error: unzip is required" >&2; exit 1; }
 
 fetch() {
   local url="$1" dest="$2"
@@ -18,10 +22,9 @@ fetch() {
 }
 
 STEEL="https://raw.githubusercontent.com/AetherRadar/operation-steel-tide/main"
+OGA="https://opengameart.org/sites/default/files"
 
-# Godot-ready, detailed PBR firearms. The source/license records are retained
-# beside each downloaded model. AK geometry is CC0; its replacement texture
-# pass is covered by Operation Steel Tide's MIT license. M4A1 sources are CC0.
+# High-detail Godot-ready PBR long guns.
 fetch "$STEEL/assets/models/steel_tide_ak74/ak47_reloadable_fp.glb" \
   "$REAL_ROOT/ak47/ak47_reloadable_fp.glb"
 fetch "$STEEL/assets/models/steel_tide_ak74/LICENSE.md" \
@@ -32,9 +35,16 @@ fetch "$STEEL/assets/models/steel_tide_m4a1/LICENSE.md" \
   "$REAL_ROOT/m4a1/LICENSE.md"
 fetch "$STEEL/LICENSE" "$REAL_ROOT/OPERATION-STEEL-TIDE-MIT.txt"
 
-# Real firearm field recordings prepared into three runtime perspectives:
-# player-near, positional world, and distant enemy. Upstream recordings are
-# The Free Firearm Sound Library (CC0).
+# Reliable GLB fallbacks for the sidearm and sniper. These prevent Godot from
+# ever displaying a white/raw FBX if Stein conversion is unavailable.
+fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/p226_reloadable.glb" \
+  "$REAL_ROOT/fallback/p226_reloadable.glb"
+fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/awm_reloadable.glb" \
+  "$REAL_ROOT/fallback/awm_reloadable.glb"
+fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/LICENSE.md" \
+  "$REAL_ROOT/fallback/LICENSE.md"
+
+# Real firearm field recordings: near player, positional world and distant.
 for profile in ak74 p226 m4a1 awm; do
   mkdir -p "$AUDIO_ROOT/$profile"
   for role in player_near world enemy_distant; do
@@ -43,63 +53,90 @@ for profile in ak74 p226 m4a1 awm; do
   done
 done
 
-MANIFEST="$REAL_ROOT/manifest.cfg"
-rm -f "$MANIFEST"
+# Replace the old generated/mechanical placeholders with CC0 recorded assets.
+fetch "$OGA/reload.wav" "$SFX_ROOT/pistol_reload.wav"
+fetch "$OGA/assaultriflereload1.wav" "$SFX_ROOT/rifle_reload.wav"
+fetch "$OGA/equipmentclick.wav" "$SFX_ROOT/equipment_click.wav"
+fetch "$OGA/Dynamite%20with%20sensor.wav" "$SFX_ROOT/explosion.wav"
 
+TMP_AUDIO="$ROOT_DIR/.realistic_audio_tmp"
+rm -rf "$TMP_AUDIO"; mkdir -p "$TMP_AUDIO"
+fetch "$OGA/steam_hisses.zip" "$TMP_AUDIO/steam_hisses.zip"
+unzip -q -o "$TMP_AUDIO/steam_hisses.zip" -d "$TMP_AUDIO/hiss"
+HISS="$(find "$TMP_AUDIO/hiss" -type f \( -iname '*.wav' -o -iname '*.ogg' \) | head -n 1 || true)"
+[[ -n "$HISS" ]] && cp -f "$HISS" "$SFX_ROOT/smoke_hiss.${HISS##*.}"
+
+fetch "$OGA/kenney_interfaceSounds.zip" "$TMP_AUDIO/ui.zip"
+unzip -q -o "$TMP_AUDIO/ui.zip" -d "$TMP_AUDIO/ui"
+UI_CONFIRM="$(find "$TMP_AUDIO/ui" -type f \( -iname '*.wav' -o -iname '*.ogg' \) | grep -Ei 'confirm|confirmation|select|click' | head -n 1 || true)"
+[[ -z "$UI_CONFIRM" ]] && UI_CONFIRM="$(find "$TMP_AUDIO/ui" -type f \( -iname '*.wav' -o -iname '*.ogg' \) | head -n 1 || true)"
+[[ -n "$UI_CONFIRM" ]] && cp -f "$UI_CONFIRM" "$SFX_ROOT/ui_confirm.${UI_CONFIRM##*.}"
+rm -rf "$TMP_AUDIO"
+
+# CC0 frag/smoke projectile models. Copy to stable filenames so the runtime
+# does not depend on the pack's internal directory naming.
+TMP_GRENADE="$ROOT_DIR/.grenade_asset_tmp"
+rm -rf "$TMP_GRENADE"; mkdir -p "$TMP_GRENADE"
+fetch "$OGA/flat_grenades.zip" "$TMP_GRENADE/flat_grenades.zip"
+unzip -q -o "$TMP_GRENADE/flat_grenades.zip" -d "$TMP_GRENADE/src"
+SMOKE_MODEL="$(find "$TMP_GRENADE/src" -type f -iname '*.glb' | grep -Ei 'smoke' | head -n 1 || true)"
+FRAG_MODEL="$(find "$TMP_GRENADE/src" -type f -iname '*.glb' | grep -Eiv 'smoke|flash|incend' | grep -Ei 'frag|grenade|he' | head -n 1 || true)"
+if [[ -n "$FRAG_MODEL" ]]; then cp -f "$FRAG_MODEL" "$UTILITY_ROOT/he_grenade.glb"; fi
+if [[ -n "$SMOKE_MODEL" ]]; then cp -f "$SMOKE_MODEL" "$UTILITY_ROOT/smoke_grenade.glb"; fi
+rm -rf "$TMP_GRENADE"
+
+MANIFEST="$REAL_ROOT/manifest.cfg"
+PISTOL_PATH="res://assets/third_party/realistic_weapons/fallback/p226_reloadable.glb"
+SNIPER_PATH="res://assets/third_party/realistic_weapons/fallback/awm_reloadable.glb"
+
+# If the user supplied Stein's high-poly pack (or a previous extraction exists),
+# convert the FBX + separate PBR textures into self-contained GLBs. This fixes
+# the white-material issue caused by handing Godot raw FBX files directly.
 if [[ $# -ge 1 ]]; then
   ZIP="$1"
   [[ -f "$ZIP" ]] || { echo "error: Stein pack not found: $ZIP" >&2; exit 1; }
-  command -v unzip >/dev/null || { echo "error: unzip is required for the Stein pack" >&2; exit 1; }
-  rm -rf "$STEIN_ROOT"
-  mkdir -p "$STEIN_ROOT"
+  rm -rf "$STEIN_ROOT"; mkdir -p "$STEIN_ROOT"
   echo "Extracting Stein Games Classic Weapons Pack ..."
   unzip -q -o "$ZIP" -d "$STEIN_ROOT"
-
-  find_weapon() {
-    local regex="$1"
-    find "$STEIN_ROOT" -type f \( -iname '*.fbx' -o -iname '*.glb' \) -print \
-      | grep -Ei "$regex" | head -n 1 || true
-  }
-
-  PISTOL="$(find_weapon '(^|[/ _-])(m?1911|colt.?1911)([/ _.-]|$)')"
-  SNIPER="$(find_weapon '(^|[/ _-])([mr]700|remington.?700)([/ _.-]|$)')"
-
-  if [[ -z "$PISTOL" || -z "$SNIPER" ]]; then
-    echo "error: could not locate both 1911 and M700/R700 models in the Stein archive." >&2
-    echo "Found model files:" >&2
-    find "$STEIN_ROOT" -type f \( -iname '*.fbx' -o -iname '*.glb' \) -print >&2
-    exit 2
-  fi
-
-  PISTOL_REL="${PISTOL#"$ROOT_DIR/"}"
-  SNIPER_REL="${SNIPER#"$ROOT_DIR/"}"
-  cat > "$MANIFEST" <<EOF
-[weapons]
-pistol="res://$PISTOL_REL"
-sniper="res://$SNIPER_REL"
-EOF
-
-  echo "Stein pistol: $PISTOL_REL"
-  echo "Stein sniper: $SNIPER_REL"
-else
-  cat > "$MANIFEST" <<'EOF'
-[weapons]
-pistol=""
-sniper=""
-EOF
-  echo
-  echo "AK-47, M4A1 and realistic firearm audio are installed."
-  echo "For the high-detail P9/1911 and M700 sniper visuals, download:"
-  echo "  https://stein-indie.itch.io/classic-weapons-pack"
-  echo "Then run this script again and pass the downloaded ZIP as its first argument, e.g.:"
-  echo "  bash tools/install-realistic-assets.sh ~/Downloads/'Classic Weapons Pack v1.1.zip'"
 fi
 
-# CRITICAL: ResourceLoader.load() only sees imported project resources. The
-# previous version downloaded GLB/FBX/WAV files and immediately started the
-# game, so a fresh source run could silently fall back to the old Dustline art.
-# Force an editor import pass now so all newly downloaded resources receive
-# .godot/imported metadata before runtime tries to load them.
+if [[ -d "$STEIN_ROOT" ]]; then
+  find_weapon() {
+    local regex="$1"
+    find "$STEIN_ROOT" -type f -iname '*.fbx' -print | grep -Ei "$regex" | head -n 1 || true
+  }
+  PISTOL="$(find_weapon '(^|[/ _-])(m?1911|colt.?1911)([/ _.-]|$)')"
+  SNIPER="$(find_weapon '(^|[/ _-])([mr]700|remington.?700)([/ _.-]|$)')"
+  BLENDER="$(command -v blender || true)"
+  if [[ -n "$PISTOL" && -n "$SNIPER" && -n "$BLENDER" ]]; then
+    echo "Converting Stein 1911 + M700 into packed PBR GLBs ..."
+    if "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
+        "$PISTOL" "$STEIN_RUNTIME/1911.glb" "$STEIN_ROOT" pistol \
+      && "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
+        "$SNIPER" "$STEIN_RUNTIME/m700.glb" "$STEIN_ROOT" sniper; then
+      PISTOL_PATH="res://assets/third_party/realistic_weapons/stein_runtime/1911.glb"
+      SNIPER_PATH="res://assets/third_party/realistic_weapons/stein_runtime/m700.glb"
+      echo "Stein high-poly conversion succeeded."
+    else
+      echo "warning: Stein conversion failed; using stable P226/AWM GLB fallbacks." >&2
+    fi
+  elif [[ -z "$BLENDER" ]]; then
+    echo "warning: Blender not found; using stable P226/AWM GLB fallbacks." >&2
+  else
+    echo "warning: Stein 1911/M700 FBX files were not found; using GLB fallbacks." >&2
+  fi
+fi
+
+cat > "$MANIFEST" <<EOF
+[weapons]
+pistol="$PISTOL_PATH"
+sniper="$SNIPER_PATH"
+
+[utility]
+he="res://assets/third_party/realistic_utility/he_grenade.glb"
+smoke="res://assets/third_party/realistic_utility/smoke_grenade.glb"
+EOF
+
 if [[ -x "$GODOT" ]]; then
   echo
   echo "Importing downloaded assets into Godot..."
@@ -107,11 +144,10 @@ if [[ -x "$GODOT" ]]; then
 else
   echo
   echo "warning: bundled Godot editor not found at $GODOT"
-  echo "Run an import pass before launching the game:"
-  echo "  godot --headless --path '$ROOT_DIR' --import"
+  echo "Run: godot --headless --path '$ROOT_DIR' --import"
 fi
 
 echo
-echo "Installed and imported realistic FPS assets."
-echo "Run the SOURCE project (do not use the old Dustline.pck):"
+echo "Installed realistic weapons, utility models and recorded SFX."
+echo "Run the SOURCE project:"
 echo "  ./engine/Godot.x86_64 --path ."
