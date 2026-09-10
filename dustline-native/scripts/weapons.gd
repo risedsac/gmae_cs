@@ -10,14 +10,15 @@ const DATA=[
 
 const REALISTIC_ROOT="res://assets/third_party/realistic_weapons/"
 const MANIFEST=REALISTIC_ROOT+"manifest.cfg"
-const FIXED_PATHS=[
+const DEFAULT_PATHS=[
 	REALISTIC_ROOT+"ak47/ak47_reloadable_fp.glb",
-	"",
+	REALISTIC_ROOT+"fallback/p226_reloadable.glb",
 	REALISTIC_ROOT+"m4a1/steel_tide_m4a1.glb",
-	""
+	REALISTIC_ROOT+"fallback/awm_reloadable.glb"
 ]
 const MANIFEST_KEYS=["ak47","pistol","m4a1","sniper"]
 const REALISTIC_SCALE=[.82,1.0,.68,1.0]
+const UTILITY_ROOT="res://assets/third_party/realistic_utility/"
 
 static func make(index: int,generate=false) -> Node3D:
 	if not generate:
@@ -39,24 +40,16 @@ static func imported_resource(path: String) -> bool:
 
 static func realistic_path(index: int) -> String:
 	if index<0 or index>=4:return ""
-	var fixed_path=FIXED_PATHS[index]
-	if not fixed_path.is_empty():
-		if imported_resource(fixed_path):return fixed_path
-		if not file_exists(fixed_path):push_warning("[DUSTLINE WEAPON] Missing realistic asset: "+fixed_path)
-	if not file_exists(MANIFEST):
-		if fixed_path.is_empty():push_warning("[DUSTLINE WEAPON] Missing manifest for "+DATA[index].name+": "+MANIFEST)
-		return ""
-	var cfg=ConfigFile.new()
-	var err=cfg.load(MANIFEST)
-	if err!=OK:
-		push_error("[DUSTLINE WEAPON] Could not read manifest: "+MANIFEST+" error="+str(err))
-		return ""
-	var path=str(cfg.get_value("weapons",MANIFEST_KEYS[index],""))
-	if path.is_empty():
-		if fixed_path.is_empty():push_warning("[DUSTLINE WEAPON] No realistic path configured for "+DATA[index].name)
-		return ""
-	if imported_resource(path):return path
-	if not file_exists(path):push_error("[DUSTLINE WEAPON] Manifest points to missing file for "+DATA[index].name+": "+path)
+	# Pistol/sniper prefer the packed Stein GLBs recorded in the manifest. AK/M4
+	# use their fixed authored GLBs. Every slot has a material-safe default.
+	if index in [1,3] and file_exists(MANIFEST):
+		var cfg=ConfigFile.new()
+		if cfg.load(MANIFEST)==OK:
+			var configured=str(cfg.get_value("weapons",MANIFEST_KEYS[index],""))
+			if not configured.is_empty() and imported_resource(configured):return configured
+	var fallback=DEFAULT_PATHS[index]
+	if imported_resource(fallback):return fallback
+	if not file_exists(fallback):push_warning("[DUSTLINE WEAPON] Missing realistic asset: "+fallback)
 	return ""
 
 static func load_realistic_weapon(index: int) -> Node3D:
@@ -70,38 +63,77 @@ static func load_realistic_weapon(index: int) -> Node3D:
 		push_error("[DUSTLINE WEAPON] Expected PackedScene but got "+resource.get_class()+" for "+path)
 		return null
 	var visual=(resource as PackedScene).instantiate()
-	if not visual:
-		push_error("[DUSTLINE WEAPON] PackedScene.instantiate failed: "+path)
-		return null
-	var root=Node3D.new();root.name=DATA[index].name
-	root.set_meta("asset_source",path)
-	visual.name="RealisticVisual"
-	visual.scale=Vector3.ONE*REALISTIC_SCALE[index]
-	if path.contains("stein_classic_weapons"):visual.rotation.y=PI/2
-	root.add_child(visual)
+	if not visual:return null
+	var root=Node3D.new();root.name=DATA[index].name;root.set_meta("asset_source",path)
+	visual.name="RealisticVisual";visual.scale=Vector3.ONE*REALISTIC_SCALE[index];root.add_child(visual)
+
+	# Preserve the complete root-relative transform when transplanting the old
+	# CC0 arms. The previous code threw away ancestor transforms, which is why
+	# wrists/forearms could appear twisted or meters away from the weapon.
 	var donor=load("res://assets/"+("sidearm" if index==1 else "rifle")+".glb").instantiate()
-	move_arm(donor,root,"MainArm")
-	move_arm(donor,root,"SupportArm")
+	move_arm_preserving_pose(donor,root,"MainArm")
+	move_arm_preserving_pose(donor,root,"SupportArm")
 	donor.free()
+
 	for part in visual.find_children("*","Node3D",true,false):
 		if part.name=="Magazine":part.name="AuthoredMagazine"
 		elif part.name=="Bolt" or part.name=="ChargingHandle":part.name="AuthoredAction"
-	ensure_anchor(root,"Magazine")
-	ensure_anchor(root,"Bolt")
+	ensure_anchor(root,"Magazine");ensure_anchor(root,"Bolt")
 	return root
 
-static func move_arm(donor: Node3D,root: Node3D,prefix: String):
+static func root_relative_transform(node: Node3D,root: Node3D) -> Transform3D:
+	var chain: Array[Transform3D]=[]
+	var current: Node=node
+	while current!=null and current!=root:
+		if current is Node3D:chain.push_front((current as Node3D).transform)
+		current=current.get_parent()
+	var result=Transform3D.IDENTITY
+	for transform_ in chain:result=result*transform_
+	return result
+
+static func move_arm_preserving_pose(donor: Node3D,root: Node3D,prefix: String):
 	for part in donor.find_children("*","Node3D",true,false):
 		if part.name.begins_with(prefix):
-			part.owner=null
-			part.get_parent().remove_child(part)
-			root.add_child(part)
+			var pose=root_relative_transform(part,donor)
+			part.owner=null;part.get_parent().remove_child(part);root.add_child(part);part.transform=pose
 			return
 
 static func ensure_anchor(root: Node3D,prefix: String):
 	for part in root.find_children("*","Node3D",true,false):
 		if part.name.begins_with(prefix):return
 	var anchor=Node3D.new();anchor.name=prefix;root.add_child(anchor)
+
+static func make_utility(kind: String) -> Node3D:
+	var path=UTILITY_ROOT+("he_grenade.glb" if kind=="he" else "smoke_grenade.glb")
+	if imported_resource(path):
+		var resource=ResourceLoader.load(path)
+		if resource is PackedScene:
+			var root=Node3D.new();root.name="HE Grenade" if kind=="he" else "Smoke Grenade"
+			var visual=(resource as PackedScene).instantiate();root.add_child(visual)
+			fit_visual(visual,.18)
+			return root
+	# Clean procedural fallback: body, neck, lever and pin instead of a plain cylinder.
+	var root=Node3D.new();root.name="HE Grenade" if kind=="he" else "Smoke Grenade"
+	var body_mat=mat(Color(.18,.24,.11) if kind=="he" else Color(.32,.36,.34),.25,.62)
+	var metal_mat=mat(Color(.17,.18,.17),.78,.30)
+	var body=CylinderMesh.new();body.top_radius=.052;body.bottom_radius=.067;body.height=.13;body.radial_segments=16
+	add_mesh(root,body,Vector3.ZERO,body_mat)
+	var neck=CylinderMesh.new();neck.top_radius=.022;neck.bottom_radius=.030;neck.height=.045;neck.radial_segments=12
+	add_mesh(root,neck,Vector3(0,.086,0),metal_mat)
+	block(root,Vector3(.025,.105,0),Vector3(.018,.075,.035),metal_mat).rotation.z=-.32
+	var ring=TorusMesh.new();ring.inner_radius=.016;ring.outer_radius=.023;ring.rings=12;ring.ring_segments=8
+	var pin=add_mesh(root,ring,Vector3(.062,.10,0),metal_mat);pin.rotation.x=PI/2
+	return root
+
+static func fit_visual(root: Node3D,target_size: float):
+	var minimum=Vector3(INF,INF,INF);var maximum=Vector3(-INF,-INF,-INF);var found=false
+	for mesh in root.find_children("*","MeshInstance3D",true,false):
+		var transform_=root_relative_transform(mesh,root);var box=mesh.get_aabb()
+		for i in 8:
+			var p=transform_*box.get_endpoint(i);minimum=minimum.min(p);maximum=maximum.max(p);found=true
+	if found:
+		var extent=maximum-minimum;var largest=maxf(extent.x,maxf(extent.y,extent.z))
+		if largest>.0001:root.scale=Vector3.ONE*(target_size/largest)
 
 static func make_legacy(index: int,generate=false) -> Node3D:
 	if index>=2 and not generate:return load("res://assets/"+("m4a1" if index==2 else "awp")+".glb").instantiate()
