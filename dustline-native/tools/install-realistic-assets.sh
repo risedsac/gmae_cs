@@ -5,6 +5,7 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 REAL_ROOT="$ROOT_DIR/assets/third_party/realistic_weapons"
 AUDIO_ROOT="$ROOT_DIR/assets/audio/realistic_weapons"
 STEIN_ROOT="$REAL_ROOT/stein_classic_weapons"
+GODOT="$ROOT_DIR/engine/Godot.x86_64"
 mkdir -p "$REAL_ROOT/ak47" "$REAL_ROOT/m4a1" "$AUDIO_ROOT"
 
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
@@ -94,7 +95,23 @@ EOF
   echo "  bash tools/install-realistic-assets.sh ~/Downloads/'Classic Weapons Pack v1.1.zip'"
 fi
 
+# CRITICAL: ResourceLoader.load() only sees imported project resources. The
+# previous version downloaded GLB/FBX/WAV files and immediately started the
+# game, so a fresh source run could silently fall back to the old Dustline art.
+# Force an editor import pass now so all newly downloaded resources receive
+# .godot/imported metadata before runtime tries to load them.
+if [[ -x "$GODOT" ]]; then
+  echo
+  echo "Importing downloaded assets into Godot..."
+  "$GODOT" --headless --path "$ROOT_DIR" --import
+else
+  echo
+  echo "warning: bundled Godot editor not found at $GODOT"
+  echo "Run an import pass before launching the game:"
+  echo "  godot --headless --path '$ROOT_DIR' --import"
+fi
+
 echo
-echo "Installed realistic FPS assets."
+echo "Installed and imported realistic FPS assets."
 echo "Run the SOURCE project (do not use the old Dustline.pck):"
 echo "  ./engine/Godot.x86_64 --path ."
