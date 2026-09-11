@@ -6,6 +6,7 @@ var players: Array[AudioStreamPlayer3D]=[]
 var ui_players: Array[AudioStreamPlayer]=[]
 var cursor=0
 var last_variant={}
+var logged_local_guns={}
 const GUNS=["rifle_shot","pistol_shot","m4_shot","sniper_shot"]
 const REAL_AUDIO_ROOT="res://assets/audio/realistic_weapons/"
 const SFX_ROOT="res://assets/audio/realistic_sfx/"
@@ -90,7 +91,11 @@ func play_at(sound: String,pos: Vector3,volume=-6.):
 func local(sound: String,volume=-6.) -> AudioStreamPlayer:
 	for p in ui_players:
 		if not p.playing:
-			if sound in GUNS and realistic_streams.has(sound):p.stream=realistic_streams[sound]["near"]
+			if sound in GUNS and realistic_streams.has(sound):
+				p.stream=realistic_streams[sound]["near"]
+				if not logged_local_guns.has(sound):
+					logged_local_guns[sound]=true
+					print("[DUSTLINE AUDIO PLAY] ",sound," <- ",p.stream.resource_path)
 			else:p.stream=select_stream(sound)
 			p.volume_db=volume;p.pitch_scale=randf_range(.994,1.006) if sound in GUNS else 1.;p.play();return p
 	return null
