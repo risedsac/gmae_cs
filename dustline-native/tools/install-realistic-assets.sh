@@ -6,13 +6,16 @@ REAL_ROOT="$ROOT_DIR/assets/third_party/realistic_weapons"
 AUDIO_ROOT="$ROOT_DIR/assets/audio/realistic_weapons"
 SFX_ROOT="$ROOT_DIR/assets/audio/realistic_sfx"
 UTILITY_ROOT="$ROOT_DIR/assets/third_party/realistic_utility"
+ARMS_ROOT="$ROOT_DIR/assets/third_party/djmaesen_arms"
 STEIN_ROOT="$REAL_ROOT/stein_classic_weapons"
 STEIN_RUNTIME="$REAL_ROOT/stein_runtime"
 GODOT="$ROOT_DIR/engine/Godot.x86_64"
-mkdir -p "$REAL_ROOT/ak47" "$REAL_ROOT/m4a1" "$REAL_ROOT/fallback" "$AUDIO_ROOT" "$SFX_ROOT" "$UTILITY_ROOT" "$STEIN_RUNTIME"
+mkdir -p "$REAL_ROOT/ak47" "$REAL_ROOT/m4a1" "$REAL_ROOT/fallback" \
+  "$AUDIO_ROOT" "$SFX_ROOT" "$UTILITY_ROOT" "$ARMS_ROOT" "$STEIN_RUNTIME"
 
 command -v curl >/dev/null || { echo "error: curl is required" >&2; exit 1; }
 command -v unzip >/dev/null || { echo "error: unzip is required" >&2; exit 1; }
+command -v python3 >/dev/null || { echo "error: python3 is required for recorded-audio preparation" >&2; exit 1; }
 
 fetch() {
   local url="$1" dest="$2"
@@ -24,7 +27,8 @@ fetch() {
 STEEL="https://raw.githubusercontent.com/AetherRadar/operation-steel-tide/main"
 OGA="https://opengameart.org/sites/default/files"
 
-# High-detail Godot-ready PBR long guns.
+# Godot-ready PBR firearm contracts. These exports contain real mechanism and
+# contact nodes; player code now binds exact sockets instead of matching bounds.
 fetch "$STEEL/assets/models/steel_tide_ak74/ak47_reloadable_fp.glb" \
   "$REAL_ROOT/ak47/ak47_reloadable_fp.glb"
 fetch "$STEEL/assets/models/steel_tide_ak74/LICENSE.md" \
@@ -33,19 +37,36 @@ fetch "$STEEL/assets/models/steel_tide_m4a1/steel_tide_m4a1.glb" \
   "$REAL_ROOT/m4a1/steel_tide_m4a1.glb"
 fetch "$STEEL/assets/models/steel_tide_m4a1/LICENSE.md" \
   "$REAL_ROOT/m4a1/LICENSE.md"
-fetch "$STEEL/LICENSE" "$REAL_ROOT/OPERATION-STEEL-TIDE-MIT.txt"
-
-# Validated Godot-ready sidearm/sniper GLBs.  These are deliberately the
-# runtime defaults even when a Stein pack is present: the previous Stein FBX
-# conversion could load successfully yet land outside the first-person camera.
 fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/p226_reloadable.glb" \
   "$REAL_ROOT/fallback/p226_reloadable.glb"
 fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/awm_reloadable.glb" \
   "$REAL_ROOT/fallback/awm_reloadable.glb"
 fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/LICENSE.md" \
   "$REAL_ROOT/fallback/LICENSE.md"
+fetch "$STEEL/LICENSE" "$REAL_ROOT/OPERATION-STEEL-TIDE-MIT.txt"
 
-# Real firearm field recordings: near player, positional world and distant.
+# DJMaesen CC-BY first-person arm derivatives authored around the same socket
+# contracts. Static variants provide calibrated ready poses; the animated rig
+# supplies platform-specific tactical/empty reload clips with articulated wrist,
+# elbow and finger motion for M4A1, P226 and AWM.
+for file in \
+  smg45_rifle_arms.glb \
+  smg45_rifle_arms_Image_0.png \
+  smg45_rifle_arms_Image_1.png \
+  smg45_rifle_arms_Image_2.png \
+  smg45_pistol_service_arms.glb \
+  smg45_pistol_service_arms_Image_0.png \
+  smg45_pistol_service_arms_Image_1.png \
+  smg45_pistol_service_arms_Image_2.png \
+  animated_reload_arms.glb \
+  animated_reload_arms_Image_0.png \
+  animated_reload_arms_Image_1.png \
+  animated_reload_arms_Image_2.png \
+  LICENSE.md; do
+  fetch "$STEEL/assets/models/djmaesen_smg45/$file" "$ARMS_ROOT/$file"
+done
+
+# Keep the previous one-shot prepared recordings as compatibility fallback.
 for profile in ak74 p226 m4a1 awm; do
   mkdir -p "$AUDIO_ROOT/$profile"
   for role in player_near world enemy_distant; do
@@ -54,21 +75,22 @@ for profile in ak74 p226 m4a1 awm; do
   done
 done
 
-# The close-mic recordings are intentionally very dry.  Preserve their real
-# muzzle crack, but mix in low-level delayed reflection + a separate real
-# distant-microphone tail so first-person fire does not sound like a synthetic
-# one-shot sample.  The mixer contains no generated oscillator/noise layers.
-if command -v python3 >/dev/null; then
-  python3 "$ROOT_DIR/tools/build_field_gunshot_mix.py" "$AUDIO_ROOT"
-else
-  echo "warning: python3 not found; keeping the dry field-recorded gunshots." >&2
-fi
+# Primary runtime audio: extract four genuinely separate transients from the
+# original field-recording takes. Dry report, world/distant report and room tail
+# remain separate files. No fixed reflection/reverb is baked into near samples.
+python3 "$ROOT_DIR/tools/prepare_multisample_gunshots.py" \
+  --cache "$ROOT_DIR/.realistic_audio_sources" \
+  --output "$AUDIO_ROOT"
 
-# Replace the old generated/mechanical placeholders with CC0 recorded assets.
+# Recorded mechanical sources. They are split into short events below so the
+# runtime can trigger magazine/action sounds at animation beats rather than
+# playing one complete reload file at t=0.
 fetch "$OGA/reload.wav" "$SFX_ROOT/pistol_reload.wav"
 fetch "$OGA/assaultriflereload1.wav" "$SFX_ROOT/rifle_reload.wav"
 fetch "$OGA/equipmentclick.wav" "$SFX_ROOT/equipment_click.wav"
 fetch "$OGA/Dynamite%20with%20sensor.wav" "$SFX_ROOT/explosion.wav"
+python3 "$ROOT_DIR/tools/prepare_reload_events.py" \
+  --input "$SFX_ROOT" --output "$SFX_ROOT/reload_events"
 
 TMP_AUDIO="$ROOT_DIR/.realistic_audio_tmp"
 rm -rf "$TMP_AUDIO"; mkdir -p "$TMP_AUDIO"
@@ -84,8 +106,7 @@ UI_CONFIRM="$(find "$TMP_AUDIO/ui" -type f \( -iname '*.wav' -o -iname '*.ogg' \
 [[ -n "$UI_CONFIRM" ]] && cp -f "$UI_CONFIRM" "$SFX_ROOT/ui_confirm.${UI_CONFIRM##*.}"
 rm -rf "$TMP_AUDIO"
 
-# CC0 frag/smoke projectile models. Copy to stable filenames so the runtime
-# does not depend on the pack's internal directory naming.
+# CC0 frag/smoke projectile models.
 TMP_GRENADE="$ROOT_DIR/.grenade_asset_tmp"
 rm -rf "$TMP_GRENADE"; mkdir -p "$TMP_GRENADE"
 fetch "$OGA/flat_grenades.zip" "$TMP_GRENADE/flat_grenades.zip"
@@ -97,17 +118,11 @@ if [[ -n "$SMOKE_MODEL" ]]; then cp -f "$SMOKE_MODEL" "$UTILITY_ROOT/smoke_grena
 rm -rf "$TMP_GRENADE"
 
 MANIFEST="$REAL_ROOT/manifest.cfg"
-# Keep these runtime paths pinned to GLBs already authored for the same Godot
-# weapon contract.  Stein conversion is retained below as an experimental
-# preview/export path, but no longer silently overrides a working first-person
-# sidearm/sniper with an off-screen model.
 PISTOL_PATH="res://assets/third_party/realistic_weapons/fallback/p226_reloadable.glb"
 SNIPER_PATH="res://assets/third_party/realistic_weapons/fallback/awm_reloadable.glb"
 
-# If the user supplied Stein's high-poly pack (or a previous extraction exists),
-# convert the FBX + separate PBR textures into self-contained GLBs for inspection.
-# They are not selected as runtime defaults until their first-person transform is
-# validated independently.
+# Stein files remain preview-only. They never override the validated runtime
+# P226/AWM contracts because those contracts expose the required sockets.
 if [[ $# -ge 1 ]]; then
   ZIP="$1"
   [[ -f "$ZIP" ]] || { echo "error: Stein pack not found: $ZIP" >&2; exit 1; }
@@ -125,19 +140,11 @@ if [[ -d "$STEIN_ROOT" ]]; then
   SNIPER="$(find_weapon '(^|[/ _-])([mr]700|remington.?700)([/ _.-]|$)')"
   BLENDER="$(command -v blender || true)"
   if [[ -n "$PISTOL" && -n "$SNIPER" && -n "$BLENDER" ]]; then
-    echo "Converting Stein 1911 + M700 into packed PBR preview GLBs ..."
-    if "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
-        "$PISTOL" "$STEIN_RUNTIME/1911.glb" "$STEIN_ROOT" pistol \
-      && "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
-        "$SNIPER" "$STEIN_RUNTIME/m700.glb" "$STEIN_ROOT" sniper; then
-      echo "Stein conversion succeeded (preview only; runtime keeps validated P226/AWM GLBs)."
-    else
-      echo "warning: Stein conversion failed; runtime is unaffected and keeps P226/AWM GLBs." >&2
-    fi
-  elif [[ -z "$BLENDER" ]]; then
-    echo "warning: Blender not found; runtime keeps validated P226/AWM GLBs." >&2
-  else
-    echo "warning: Stein 1911/M700 FBX files were not found; runtime keeps P226/AWM GLBs." >&2
+    echo "Converting Stein 1911 + M700 into preview GLBs ..."
+    "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
+      "$PISTOL" "$STEIN_RUNTIME/1911.glb" "$STEIN_ROOT" pistol || true
+    "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
+      "$SNIPER" "$STEIN_RUNTIME/m700.glb" "$STEIN_ROOT" sniper || true
   fi
 fi
 
@@ -158,12 +165,11 @@ if [[ -x "$GODOT" ]]; then
 else
   echo
   echo "warning: bundled Godot editor not found at $GODOT"
-  echo "Run: godot --headless --path '$ROOT_DIR' --import"
+  echo "Use your local engine to run: Godot.x86_64 --headless --path '$ROOT_DIR' --import"
 fi
 
 echo
-echo "Installed realistic weapons, utility models and field-recorded SFX."
-echo "Runtime sidearm/sniper: validated P226/AWM GLBs."
-echo "First-person gunshots: close mic + real recorded room/distant tail mix."
-echo "Run the SOURCE project:"
-echo "  ./engine/Godot.x86_64 --path ."
+echo "Installed socket-aware weapons, authored FPS arms and recorded audio."
+echo "Gunshots: four transient variants per profile; dry/tail layers stay separate."
+echo "Reload Foley: event clips prepared for animation-synchronised playback."
+echo "Run the SOURCE project only; do not use the old Dustline.pck."
