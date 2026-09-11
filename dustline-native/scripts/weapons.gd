@@ -19,6 +19,15 @@ const DEFAULT_PATHS=[
 const MANIFEST_KEYS=["ak47","pistol","m4a1","sniper"]
 const REALISTIC_SCALE=[.82,1.0,.68,1.0]
 const UTILITY_ROOT="res://assets/third_party/realistic_utility/"
+const AUTHORED_AK_VIEWMODEL="res://assets/third_party/fps_arms_ak74/FPS_AK74_Viewmodel.tscn"
+const VIEWMODEL_CLIPS={
+	"draw":"Rig|AK_Draw",
+	"idle":"Rig|AK_Idle",
+	"reload":"Rig|AK_Reload_full",
+	"fire":"Rig|AK_Shot",
+	"walk":"Rig|AK_Walk",
+	"run":"Rig|AK_Run"
+}
 
 static func make(index: int,generate=false) -> Node3D:
 	if not generate:
@@ -28,6 +37,22 @@ static func make(index: int,generate=false) -> Node3D:
 			return upgraded
 		push_warning("[DUSTLINE WEAPON] FALLBACK "+DATA[index].name+" -> original Dustline model")
 	return make_legacy(index,generate)
+
+# Player-only constructor. Bots deliberately keep using make() so the authored
+# first-person arms never appear as a third-person world weapon.
+static func make_player_viewmodel(index: int) -> Node3D:
+	if index==0 and imported_resource(AUTHORED_AK_VIEWMODEL):
+		var resource=ResourceLoader.load(AUTHORED_AK_VIEWMODEL,"",ResourceLoader.CACHE_MODE_REPLACE)
+		if resource is PackedScene:
+			var root=Node3D.new();root.name="AK-47 Authored Viewmodel"
+			root.set_meta("authored_viewmodel",true);root.set_meta("asset_source",AUTHORED_AK_VIEWMODEL)
+			var visual=(resource as PackedScene).instantiate();visual.name="FPSArmsAK74";root.add_child(visual)
+			print("[DUSTLINE VIEWMODEL] AUTHORED AK-74M arms <- ",AUTHORED_AK_VIEWMODEL)
+			return root
+	var fallback=make(index);fallback.set_meta("authored_viewmodel",false);return fallback
+
+static func viewmodel_clip(state: String) -> String:
+	return str(VIEWMODEL_CLIPS.get(state,""))
 
 static func file_exists(path: String) -> bool:
 	return not path.is_empty() and FileAccess.file_exists(path)
@@ -67,9 +92,8 @@ static func load_realistic_weapon(index: int) -> Node3D:
 	var root=Node3D.new();root.name=DATA[index].name;root.set_meta("asset_source",path)
 	visual.name="RealisticVisual";visual.scale=Vector3.ONE*REALISTIC_SCALE[index];root.add_child(visual)
 
-	# Preserve the complete root-relative transform when transplanting the old
-	# CC0 arms. The previous code threw away ancestor transforms, which is why
-	# wrists/forearms could appear twisted or meters away from the weapon.
+	# The old CC0 arms remain only as a fallback for weapons that do not yet have
+	# a dedicated authored first-person rig.
 	var donor=load("res://assets/"+("sidearm" if index==1 else "rifle")+".glb").instantiate()
 	move_arm_preserving_pose(donor,root,"MainArm")
 	move_arm_preserving_pose(donor,root,"SupportArm")
