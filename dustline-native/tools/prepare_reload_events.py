@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Split recorded reload Foley into short mechanism events.
 
-This does not synthesize weapon Foley.  It finds separated transients in the
+This does not synthesize weapon Foley. It finds separated transients in the
 recorded pistol/rifle reload takes already downloaded by the installer and
 exports compact event clips so gameplay can trigger them at animation beats.
+Each gameplay platform receives an independent output namespace, even when a
+recorded source is shared, so timings/assets can later be replaced per weapon.
 """
 from __future__ import annotations
 
@@ -69,8 +71,6 @@ def normalize(samples: array,target=.62) -> array:
 
 def export_profile(source: Path, out: Path, profile: str) -> None:
     rate,samples=read_wav(source);points=peaks(samples,rate,3)
-    # Chronological interpretation of these complete reload recordings:
-    # first manipulation/extraction, magazine seating, final action/slide beat.
     names=("mag_out","mag_in","action")
     for name,point in zip(names,points):
         write_wav(out/f"{profile}_{name}.wav",rate,normalize(event_slice(samples,rate,point)))
@@ -81,10 +81,8 @@ def main() -> None:
     p=argparse.ArgumentParser();p.add_argument("--input",type=Path,required=True);p.add_argument("--output",type=Path,required=True)
     args=p.parse_args()
     export_profile(args.input/"pistol_reload.wav",args.output,"p226")
+    export_profile(args.input/"rifle_reload.wav",args.output,"ak74")
     export_profile(args.input/"rifle_reload.wav",args.output,"m4a1")
-    # AWM uses the same recorded long-gun magazine handling as a fallback, but
-    # receives its own files/events so its timing and bolt sound can be tuned
-    # independently without changing M4 playback.
     export_profile(args.input/"rifle_reload.wav",args.output,"awm")
 
 if __name__=="__main__":main()
