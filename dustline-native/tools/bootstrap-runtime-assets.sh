@@ -77,7 +77,10 @@ echo "[DUSTLINE BOOTSTRAP] importing generated/downloaded resources..."
 echo "[DUSTLINE BOOTSTRAP] validating sockets, reload clips and multisample audio..."
 "$GODOT" --headless --path "$ROOT_DIR" --script res://tools/verify_runtime_assets.gd
 
+echo "[DUSTLINE BOOTSTRAP] running source feature acceptance checks..."
+"$GODOT" --headless --path "$ROOT_DIR" --script res://tools/verify_features.gd
+
 echo "[DUSTLINE BOOTSTRAP] running source-project smoke test..."
 "$GODOT" --headless --path "$ROOT_DIR" -- --smoke
 
-echo "[DUSTLINE BOOTSTRAP] OK — imported, contract-checked and source smoke-tested."
+echo "[DUSTLINE BOOTSTRAP] OK — imported, contract-checked and source-tested."
