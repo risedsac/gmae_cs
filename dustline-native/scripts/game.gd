@@ -1,6 +1,15 @@
 extends Node3D
 
 const W=preload("res://scripts/weapons.gd")
+const BUY_CATALOG={
+	"ak":{"name":"AK-47","price":2700,"category":"主武器","weapon":0},
+	"m4":{"name":"M4A1","price":3100,"category":"主武器","weapon":2},
+	"awp":{"name":"AWP","price":4750,"category":"主武器","weapon":3},
+	"he":{"name":"高爆手雷","price":300,"category":"投掷物"},
+	"smoke":{"name":"烟雾弹","price":300,"category":"投掷物"},
+	"armor":{"name":"护甲","price":650,"category":"装备"},
+	"kit":{"name":"拆弹器","price":400,"category":"装备","team":1}
+}
 var world
 var player
 var bots: Array=[]
@@ -146,33 +155,49 @@ func _unhandled_input(event):
 func in_buy_zone() -> bool:
 	return player.global_position.distance_to(world.T_SPAWN if player.team==0 else world.CT_SPAWN)<8.5
 
+func can_open_buy() -> bool:
+	return active and phase in ["freeze","live"] and player.hp>0 and in_buy_zone()
+
 func can_buy() -> bool:
-	return active and phase in ["freeze","live"] and buy_left>0 and player.hp>0 and in_buy_zone()
+	return can_open_buy() and buy_left>0
+
+func buy_state(item: String) -> Dictionary:
+	if not BUY_CATALOG.has(item):return {"enabled":false,"status":"不可用","reason":"未知商品","price":0}
+	var info: Dictionary=BUY_CATALOG[item];var reason=""
+	if not active or phase not in ["freeze","live"]:reason="购买阶段已结束"
+	elif player.hp<=0:reason="已阵亡"
+	elif not in_buy_zone():reason="离开购买区"
+	elif buy_left<=0:reason="购买时间结束"
+	elif item=="kit" and player.team!=1:reason="仅 CT"
+	elif info.has("weapon") and player.primary==int(info.weapon):reason="已装备"
+	elif item in ["he","smoke"] and player.grenades[item]>=1:reason="已携带"
+	elif item=="kit" and player.kit:reason="已装备"
+	elif item=="armor" and player.armor>=100:reason="已装备"
+	elif player.money<int(info.price):reason="金钱不足"
+	return {"enabled":reason.is_empty(),"status":"购买" if reason.is_empty() else reason,"reason":reason,"price":int(info.price),"name":str(info.name),"category":str(info.category)}
 
 func toggle_buy():
-	if hud.shop.visible:hud.shop.visible=false
-	elif can_buy():hud.shop.visible=true
-	else:feed("只能在购买时间内、己方出生区购买")
+	if hud.shop.visible:
+		hud.shop.visible=false
+	elif can_open_buy():
+		hud.shop.visible=true;hud.on_shop_opened()
+	else:
+		feed("只能在己方出生区的购买阶段打开商店")
 	player.shot_queued=false
 	if not test_mode:Input.mouse_mode=Input.MOUSE_MODE_VISIBLE if hud.shop.visible else Input.MOUSE_MODE_CAPTURED
 
 func buy(item: String) -> bool:
-	if not can_buy():feed("当前无法购买");return false
-	var prices={"ak":2700,"m4":3100,"awp":4750,"he":300,"smoke":300,"armor":650,"kit":400}
-	if not prices.has(item):return false
-	var cost=prices[item]
-	if item in ["he","smoke"] and player.grenades[item]>=1:feed("已携带此投掷物");return false
-	if item=="kit" and (player.team!=1 or player.kit):feed("拆弹器仅防守方可购买，每人一个");return false
-	if item=="armor" and player.armor>=100:feed("护甲已满");return false
-	var ids={"ak":0,"m4":2,"awp":3}
-	if ids.has(item) and player.primary==ids[item]:feed("已拥有这把主武器");return false
-	if player.money<cost:feed("金钱不足");return false
-	player.money-=cost
-	if ids.has(item):player.equip_primary(ids[item])
+	var state=buy_state(item)
+	if not bool(state.enabled):
+		hud.set_shop_feedback(str(state.reason),false);hud.refresh_shop();return false
+	var info: Dictionary=BUY_CATALOG[item];player.money-=int(info.price)
+	if info.has("weapon"):player.equip_primary(int(info.weapon))
 	elif item in ["he","smoke"]:player.grenades[item]+=1
 	elif item=="armor":player.armor=100
 	elif item=="kit":player.kit=true
-	sound.local("buy",-18);feed("购买成功 · $%d"%player.money);return true
+	sound.local("buy",-18)
+	var text="购买成功 · %s · 余额 $%d"%[str(info.name),player.money]
+	hud.set_shop_feedback(text,true);hud.refresh_shop();return true
 
 func _physics_process(dt):
 	if not active:return
@@ -188,7 +213,7 @@ func _physics_process(dt):
 			else:next_round()
 		return
 	buy_left=maxf(0,buy_left-dt)
-	if hud.shop.visible and not can_buy():toggle_buy()
+	if hud.shop.visible:hud.refresh_shop()
 	if phase=="freeze":
 		phase_left-=dt
 		if phase_left<=0:phase="live";feed("行动开始 · "+plan+" 点路线")
@@ -243,8 +268,7 @@ func stop_interact(actor):
 func actor_died(actor,source=null,head=false):
 	stop_interact(actor)
 	if bomb_carrier==actor:
-		objective_handlers.clear()
-		bomb_carrier=null;bomb_state="dropped";bomb_position=actor.global_position
+		objective_handlers.clear();bomb_carrier=null;bomb_state="dropped";bomb_position=actor.global_position
 		bomb_visual.global_position=bomb_position+Vector3.UP*.1;bomb_visual.visible=true
 	if actor==player:deaths+=1
 	else:actor.score_deaths+=1
@@ -255,10 +279,8 @@ func actor_died(actor,source=null,head=false):
 	check_elimination()
 
 func objective_for(bot) -> Vector3:
-	var allies=team_alive(bot.team)
-	var slot=allies.find(bot)
+	var allies=team_alive(bot.team);var slot=allies.find(bot)
 	if bomb_state=="planted" or (bomb_state=="dropped" and bot.team==0):
-		# One actor handles the C4; teammates occupy distinct approach/cover positions.
 		var handler=interaction_actor if is_instance_valid(interaction_actor) else objective_handlers.get(bot.team)
 		if not is_instance_valid(handler) or handler.hp<=0:
 			var best=INF;handler=null
@@ -270,22 +292,16 @@ func objective_for(bot) -> Vector3:
 		if (bot.team==1 or bomb_state=="dropped") and bot==handler:return bomb_position
 		var ring=4.0 if bot.team==0 else 3.8
 		for turn in 8:
-			var angle=slot*TAU/maxi(1,allies.size())+turn*.42
-			var p=bomb_position+Vector3(cos(angle)*ring,0,sin(angle)*ring)
+			var angle=slot*TAU/maxi(1,allies.size())+turn*.42;var p=bomb_position+Vector3(cos(angle)*ring,0,sin(angle)*ring)
 			if world.walkable(p):return p
 		return bot.global_position
 	if bot.team==0:
-		var route=world.route_to(plan,0)
-		bot.route_stage=mini(bot.route_stage,route.size()-1)
+		var route=world.route_to(plan,0);bot.route_stage=mini(bot.route_stage,route.size()-1)
 		if bot.flat_distance(route[bot.route_stage])<2.2 and bot.route_stage<route.size()-1:bot.route_stage+=1
-		var target=route[bot.route_stage]
-		# Offset destinations along the corridor so five players do not all step on one waypoint.
-		var forward=(target-bot.global_position).normalized()
-		var side=Vector3(-forward.z,0,forward.x)
+		var target=route[bot.route_stage];var forward=(target-bot.global_position).normalized();var side=Vector3(-forward.z,0,forward.x)
 		var offset=side*((slot%3)-1)*1.05-forward*(slot%2)*.7
 		if bot!=bomb_carrier and world.walkable(target+offset):target+=offset
 		return target
-	# Two anchor pairs watch the sites; the fifth holds the mid rotation.
 	var anchors=[Vector3(20,0,-24),Vector3(16,0,-27),Vector3(-20,0,-26),Vector3(-15,0,-24),Vector3(2.5,0,-23)]
 	return anchors[slot%anchors.size()]
 
@@ -293,7 +309,6 @@ func bot_interaction(bot,dt: float) -> bool:
 	var should=false
 	if bot.team==0 and bot==bomb_carrier and world.site_at(bot.global_position)!="" and not bot.visible_target and bot.is_on_floor():should=true
 	if bot.team==1 and bomb_state=="planted" and bot.global_position.distance_to(bomb_position)<2.4:
-		# A nearby idle player does not stop a teammate from defusing. Holding E takes priority.
 		should=interaction_actor!=player and objective_handlers.get(1,bot)==bot and (not bot.visible_target or bomb_left<12)
 	if should:bot.velocity=Vector3.ZERO
 	interact(bot,should,dt);return should
@@ -345,13 +360,11 @@ func add_smoke(pos: Vector3):
 		var mesh=SphereMesh.new();mesh.radius=2.1;mesh.height=4.2
 		var m=MeshInstance3D.new();m.mesh=mesh;m.material_override=material_;node.add_child(m)
 		m.position=Vector3(cos(i*2.4)*1.8,sin(i*1.7)*.65,sin(i*2.4)*1.8) if i else Vector3.ZERO
-	smokes.append({"node":node,"pos":node.position,"radius":3.8,"left":18.,"age":0.})
-	sound.play_at("smoke_hiss",pos,-17)
+	smokes.append({"node":node,"pos":node.position,"radius":3.8,"left":18.,"age":0.});sound.play_at("smoke_hiss",pos,-17)
 
 func update_smokes(dt: float):
 	for i in range(smokes.size()-1,-1,-1):
-		var s=smokes[i];s.left-=dt;s.age+=dt
-		s.node.scale=Vector3.ONE*minf(1,minf(s.age/1.1,s.left/1.5))
+		var s=smokes[i];s.left-=dt;s.age+=dt;s.node.scale=Vector3.ONE*minf(1,minf(s.age/1.1,s.left/1.5))
 		if s.left<=0:s.node.queue_free();smokes.remove_at(i)
 
 func explode(pos: Vector3,radius: float,damage: int,source):
@@ -368,8 +381,7 @@ func explode(pos: Vector3,radius: float,damage: int,source):
 func make_bomb_visual():
 	bomb_visual=Node3D.new();add_child(bomb_visual)
 	W.block(bomb_visual,Vector3.ZERO,Vector3(.34,.16,.22),W.mat(Color(.17,.19,.13),.2,.7))
-	W.block(bomb_visual,Vector3(0,.09,0),Vector3(.13,.025,.085),W.mat(Color(.4,.8,.27),.1,.3))
-	bomb_visual.visible=false
+	W.block(bomb_visual,Vector3(0,.09,0),Vector3(.13,.025,.085),W.mat(Color(.4,.8,.27),.1,.3));bomb_visual.visible=false
 
 func feed(text_: String):message=text_;message_left=3.5
 
@@ -392,25 +404,20 @@ func smoke_check():
 	sound.silence();OS.delay_msec(100);get_tree().quit()
 
 func capture_frames():
-	test_mode=true;await get_tree().process_frame
-	await RenderingServer.frame_post_draw
+	test_mode=true;await get_tree().process_frame;await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png("res://tests/v2-menu.png")
-	start();hud.shop.visible=true
+	start();hud.shop.visible=true;hud.on_shop_opened()
 	for i in 3:await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://tests/v2-buy.png")
+	await RenderingServer.frame_post_draw;get_viewport().get_texture().get_image().save_png("res://tests/v2-buy.png")
 	hud.shop.visible=false;phase="live";player.equip_primary(2)
 	for bot in bots:bot.set_physics_process(false)
 	player.position=Vector3(20,0,-13);player.pitch=0
 	for i in 4:await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://tests/v2-a.png")
+	await RenderingServer.frame_post_draw;get_viewport().get_texture().get_image().save_png("res://tests/v2-a.png")
 	player.position=Vector3(-18,0,-15);player.equip_primary(3)
 	for i in 4:await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://tests/v2-b.png")
+	await RenderingServer.frame_post_draw;get_viewport().get_texture().get_image().save_png("res://tests/v2-b.png")
 	player.scoped=true;add_smoke(Vector3(-18,0,-22))
 	for i in 90:await get_tree().process_frame
-	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://tests/v2-scope-smoke.png")
+	await RenderingServer.frame_post_draw;get_viewport().get_texture().get_image().save_png("res://tests/v2-scope-smoke.png")
 	sound.silence();OS.delay_msec(100);print("CAPTURE_OK");get_tree().quit()

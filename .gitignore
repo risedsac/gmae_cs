@@ -3,3 +3,12 @@ package-check/
 package-check-v2/
 package-check-v3
 tools/
+
+dustline-native/assets/third_party/realistic_weapons/
+dustline-native/assets/third_party/realistic_utility/
+dustline-native/assets/third_party/fps_arms_ak74/
+dustline-native/assets/third_party/djmaesen_arms/
+dustline-native/assets/audio/realistic_weapons/
+dustline-native/assets/audio/realistic_sfx/
+dustline-native/.realistic_audio_sources/
+dustline-native/audio_review/
