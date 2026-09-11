@@ -35,8 +35,9 @@ fetch "$STEEL/assets/models/steel_tide_m4a1/LICENSE.md" \
   "$REAL_ROOT/m4a1/LICENSE.md"
 fetch "$STEEL/LICENSE" "$REAL_ROOT/OPERATION-STEEL-TIDE-MIT.txt"
 
-# Reliable GLB fallbacks for the sidearm and sniper. These prevent Godot from
-# ever displaying a white/raw FBX if Stein conversion is unavailable.
+# Validated Godot-ready sidearm/sniper GLBs.  These are deliberately the
+# runtime defaults even when a Stein pack is present: the previous Stein FBX
+# conversion could load successfully yet land outside the first-person camera.
 fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/p226_reloadable.glb" \
   "$REAL_ROOT/fallback/p226_reloadable.glb"
 fetch "$STEEL/assets/models/steel_tide_reloadable_weapons/awm_reloadable.glb" \
@@ -52,6 +53,16 @@ for profile in ak74 p226 m4a1 awm; do
       "$AUDIO_ROOT/$profile/${profile}_${role}.wav"
   done
 done
+
+# The close-mic recordings are intentionally very dry.  Preserve their real
+# muzzle crack, but mix in low-level delayed reflection + a separate real
+# distant-microphone tail so first-person fire does not sound like a synthetic
+# one-shot sample.  The mixer contains no generated oscillator/noise layers.
+if command -v python3 >/dev/null; then
+  python3 "$ROOT_DIR/tools/build_field_gunshot_mix.py" "$AUDIO_ROOT"
+else
+  echo "warning: python3 not found; keeping the dry field-recorded gunshots." >&2
+fi
 
 # Replace the old generated/mechanical placeholders with CC0 recorded assets.
 fetch "$OGA/reload.wav" "$SFX_ROOT/pistol_reload.wav"
@@ -86,12 +97,17 @@ if [[ -n "$SMOKE_MODEL" ]]; then cp -f "$SMOKE_MODEL" "$UTILITY_ROOT/smoke_grena
 rm -rf "$TMP_GRENADE"
 
 MANIFEST="$REAL_ROOT/manifest.cfg"
+# Keep these runtime paths pinned to GLBs already authored for the same Godot
+# weapon contract.  Stein conversion is retained below as an experimental
+# preview/export path, but no longer silently overrides a working first-person
+# sidearm/sniper with an off-screen model.
 PISTOL_PATH="res://assets/third_party/realistic_weapons/fallback/p226_reloadable.glb"
 SNIPER_PATH="res://assets/third_party/realistic_weapons/fallback/awm_reloadable.glb"
 
 # If the user supplied Stein's high-poly pack (or a previous extraction exists),
-# convert the FBX + separate PBR textures into self-contained GLBs. This fixes
-# the white-material issue caused by handing Godot raw FBX files directly.
+# convert the FBX + separate PBR textures into self-contained GLBs for inspection.
+# They are not selected as runtime defaults until their first-person transform is
+# validated independently.
 if [[ $# -ge 1 ]]; then
   ZIP="$1"
   [[ -f "$ZIP" ]] || { echo "error: Stein pack not found: $ZIP" >&2; exit 1; }
@@ -109,21 +125,19 @@ if [[ -d "$STEIN_ROOT" ]]; then
   SNIPER="$(find_weapon '(^|[/ _-])([mr]700|remington.?700)([/ _.-]|$)')"
   BLENDER="$(command -v blender || true)"
   if [[ -n "$PISTOL" && -n "$SNIPER" && -n "$BLENDER" ]]; then
-    echo "Converting Stein 1911 + M700 into packed PBR GLBs ..."
+    echo "Converting Stein 1911 + M700 into packed PBR preview GLBs ..."
     if "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
         "$PISTOL" "$STEIN_RUNTIME/1911.glb" "$STEIN_ROOT" pistol \
       && "$BLENDER" -b --python "$ROOT_DIR/tools/convert_stein_weapon.py" -- \
         "$SNIPER" "$STEIN_RUNTIME/m700.glb" "$STEIN_ROOT" sniper; then
-      PISTOL_PATH="res://assets/third_party/realistic_weapons/stein_runtime/1911.glb"
-      SNIPER_PATH="res://assets/third_party/realistic_weapons/stein_runtime/m700.glb"
-      echo "Stein high-poly conversion succeeded."
+      echo "Stein conversion succeeded (preview only; runtime keeps validated P226/AWM GLBs)."
     else
-      echo "warning: Stein conversion failed; using stable P226/AWM GLB fallbacks." >&2
+      echo "warning: Stein conversion failed; runtime is unaffected and keeps P226/AWM GLBs." >&2
     fi
   elif [[ -z "$BLENDER" ]]; then
-    echo "warning: Blender not found; using stable P226/AWM GLB fallbacks." >&2
+    echo "warning: Blender not found; runtime keeps validated P226/AWM GLBs." >&2
   else
-    echo "warning: Stein 1911/M700 FBX files were not found; using GLB fallbacks." >&2
+    echo "warning: Stein 1911/M700 FBX files were not found; runtime keeps P226/AWM GLBs." >&2
   fi
 fi
 
@@ -148,6 +162,8 @@ else
 fi
 
 echo
-echo "Installed realistic weapons, utility models and recorded SFX."
+echo "Installed realistic weapons, utility models and field-recorded SFX."
+echo "Runtime sidearm/sniper: validated P226/AWM GLBs."
+echo "First-person gunshots: close mic + real recorded room/distant tail mix."
 echo "Run the SOURCE project:"
 echo "  ./engine/Godot.x86_64 --path ."
