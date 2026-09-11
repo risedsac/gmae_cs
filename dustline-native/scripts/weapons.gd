@@ -30,6 +30,12 @@ const SOCKET_CONTRACTS=[
 	{"primary":["PrimaryGripSocket"],"support":["SupportGripSocket"],"magazine":["Magazine"],"spare_magazine":["SpareMagazine"],"magazine_grip":["MagazineGripSocket"],"magazine_well":["MagazineWellSocket"],"action":["ChargingHandle"],"action_grip":["ChargingHandleSocket"]}
 ]
 const VIEWMODEL_CLIPS={"draw":"Rig|AK_Draw","idle":"Rig|AK_Idle","reload":"Rig|AK_Reload_full","fire":"Rig|AK_Shot","walk":"Rig|AK_Walk","run":"Rig|AK_Run"}
+const RELOAD_EVENT_FRACTIONS=[
+	{"tactical":[{"f":.22,"name":"mag_out"},{"f":.58,"name":"mag_in"},{"f":.82,"name":"action_pull"},{"f":.91,"name":"action_release"}],"empty":[{"f":.20,"name":"mag_out"},{"f":.55,"name":"mag_in"},{"f":.80,"name":"action_pull"},{"f":.92,"name":"action_release"}]},
+	{"tactical":[{"f":.20,"name":"mag_out"},{"f":.57,"name":"mag_in"},{"f":.80,"name":"action_pull"},{"f":.91,"name":"action_release"}],"empty":[{"f":.18,"name":"mag_out"},{"f":.54,"name":"mag_in"},{"f":.78,"name":"action_pull"},{"f":.91,"name":"action_release"}]},
+	{"tactical":[{"f":.19,"name":"mag_out"},{"f":.56,"name":"mag_in"},{"f":.82,"name":"action_pull"},{"f":.92,"name":"action_release"}],"empty":[{"f":.18,"name":"mag_out"},{"f":.53,"name":"mag_in"},{"f":.80,"name":"action_pull"},{"f":.93,"name":"action_release"}]},
+	{"tactical":[{"f":.18,"name":"mag_out"},{"f":.54,"name":"mag_in"},{"f":.75,"name":"action_pull"},{"f":.88,"name":"action_release"}],"empty":[{"f":.17,"name":"mag_out"},{"f":.52,"name":"mag_in"},{"f":.74,"name":"action_pull"},{"f":.89,"name":"action_release"}]}
+]
 
 static func make(index: int,generate=false) -> Node3D:
 	if not generate:
@@ -55,6 +61,9 @@ static func viewmodel_clip(state: String) -> String:return str(VIEWMODEL_CLIPS.g
 static func reload_clip(index: int,empty_reload: bool) -> String:
 	if index<0 or index>=RELOAD_CLIP_STEMS.size():return ""
 	return "reload_"+RELOAD_CLIP_STEMS[index]+("_empty" if empty_reload else "_tactical")
+static func reload_events(index: int,empty_reload: bool) -> Array:
+	if index<0 or index>=RELOAD_EVENT_FRACTIONS.size():return []
+	return RELOAD_EVENT_FRACTIONS[index]["empty" if empty_reload else "tactical"]
 static func viewmodel_bindings(root: Node3D) -> Dictionary:
 	var value=root.get_meta("rig_bindings",{});return value if value is Dictionary else {}
 static func file_exists(path: String) -> bool:return not path.is_empty() and FileAccess.file_exists(path)
@@ -103,19 +112,15 @@ static func find_animation_player(node: Node):
 	return null
 
 static func align_mount_marker(mount: Node3D,marker: Node3D,target_in_root: Transform3D):
-	# Align translation + orientation only. Full affine inversion would cancel the
-	# authored .64/.72 arm presentation scale and make the pistol hands enormous.
-	var marker_in_mount=root_relative_transform(marker,mount)
-	var marker_rotation=marker_in_mount.basis.orthonormalized();var target_rotation=target_in_root.basis.orthonormalized()
-	mount.basis=target_rotation*marker_rotation.inverse()
-	mount.position=target_in_root.origin-mount.basis*marker_in_mount.origin
+	var marker_in_mount=root_relative_transform(marker,mount);var marker_rotation=marker_in_mount.basis.orthonormalized();var target_rotation=target_in_root.basis.orthonormalized()
+	mount.basis=target_rotation*marker_rotation.inverse();mount.position=target_in_root.origin-mount.basis*marker_in_mount.origin
 
 static func calibrate_support_arm(root: Node3D,support_target: Node3D,left_arm: Node3D,left_grip: Node3D,index: int):
 	var target=root_relative_transform(support_target,root);var current=root_relative_transform(left_grip,root);var delta=target.origin-current.origin
 	var parent=left_arm.get_parent() as Node3D
 	if parent:
 		var parent_in_root=root_relative_transform(parent,root);left_arm.position+=parent_in_root.basis.inverse()*delta
-	print("[DUSTLINE RIG] ",DATA[index].name," support correction=",snappedf(delta.length(),.0001)," m")
+	print("[DUSTLINE RIG] ",DATA[index].name," support socket correction=",snappedf(delta.length(),.0001)," m")
 
 static func attach_static_arms(root: Node3D,index: int,bindings: Dictionary):
 	var path=STATIC_ARM_PATHS[index]
@@ -141,15 +146,20 @@ static func attach_reload_arms(root: Node3D,index: int,bindings: Dictionary):
 	var mount=Node3D.new();mount.name="ReloadArmsMount";root.add_child(mount)
 	var rig=(res as PackedScene).instantiate();rig.name="ReloadArmsRig";mount.add_child(rig)
 	var right_grip=find_exact(rig,"RightGripFrame") as Node3D;var left_palm=find_exact(rig,"LeftPalmFrame") as Node3D;var left_mag=find_exact(rig,"LeftSidearmMagazineAnchorFrame") as Node3D
-	var long_mesh=find_exact(rig,"LongGunReloadForearmsMesh") as Node3D;var side_mesh=find_exact(rig,"SidearmReloadForearmsMesh") as Node3D;var full_audit=find_exact(rig,"FullReloadArmsAuditMesh") as Node3D;var compatibility=find_exact(rig,"ReloadArmsMesh") as Node3D
-	var anim=find_animation_player(rig)
-	if not right_grip or not left_palm or not anim:push_error("[DUSTLINE RIG] animated reload arm contract missing for "+DATA[index].name);mount.queue_free();return
+	var skeleton=find_exact(rig,"ReloadArmsSkeleton") as Skeleton3D;var long_mesh=find_exact(rig,"LongGunReloadForearmsMesh") as Node3D;var side_mesh=find_exact(rig,"SidearmReloadForearmsMesh") as Node3D
+	var full_audit=find_exact(rig,"FullReloadArmsAuditMesh") as Node3D;var compatibility=find_exact(rig,"ReloadArmsMesh") as Node3D;var anim=find_animation_player(rig)
+	if not right_grip or not left_palm or not skeleton or not anim:
+		push_error("[DUSTLINE RIG] animated reload arm contract missing for "+DATA[index].name);mount.queue_free();return
+	var tactical=reload_clip(index,false);var empty=reload_clip(index,true)
+	if not anim.has_animation(tactical) or not anim.has_animation(empty):
+		push_error("[DUSTLINE RIG] missing authored reload clips for "+DATA[index].name);mount.queue_free();return
 	align_mount_marker(mount,right_grip,root_relative_transform(primary,root))
 	if long_mesh:long_mesh.visible=index!=1
 	if side_mesh:side_mesh.visible=index==1
 	if full_audit:full_audit.visible=false
 	if compatibility:compatibility.visible=true
-	mount.visible=false;bindings["reload_mount"]=mount;bindings["reload_rig"]=rig;bindings["reload_anim"]=anim;bindings["reload_left_palm"]=left_palm;bindings["reload_mag_anchor"]=left_mag if left_mag else left_palm
+	mount.visible=false;bindings["reload_mount"]=mount;bindings["reload_rig"]=rig;bindings["reload_anim"]=anim;bindings["reload_skeleton"]=skeleton;bindings["reload_left_palm"]=left_palm;bindings["reload_mag_anchor"]=left_mag if left_mag else left_palm
+	bindings["left_shoulder_bone"]=skeleton.find_bone("L_arm_01");bindings["left_elbow_bone"]=skeleton.find_bone("L_elbow_02");bindings["left_wrist_bone"]=skeleton.find_bone("L_wrist_03")
 
 static func load_realistic_weapon(index: int,with_player_arms=false) -> Node3D:
 	var path=realistic_path(index)
@@ -164,20 +174,23 @@ static func load_realistic_weapon(index: int,with_player_arms=false) -> Node3D:
 	bindings["magazine"]=required_contract_node(visual,index,"magazine");bindings["spare_magazine"]=optional_contract_node(visual,index,"spare_magazine")
 	bindings["action"]=required_contract_node(visual,index,"action");bindings["magazine_well"]=optional_contract_node(visual,index,"magazine_well")
 	var magazine=bindings.get("magazine") as Node3D;var action=bindings.get("action") as Node3D
-	# Scope sockets to their real mechanisms first. Only fall back to an exact
-	# scene-wide name for older exports; never use a prefix match.
 	bindings["magazine_grip"]=find_exact(magazine,"MagazineGripSocket") if magazine else null
-	if not bindings["magazine_grip"]:bindings["magazine_grip"]=required_contract_node(visual,index,"magazine_grip")
+	if not bindings["magazine_grip"]:push_error("[DUSTLINE RIG] "+DATA[index].name+" MagazineGripSocket must be a child of the real Magazine")
 	bindings["action_grip"]=find_exact(action,"ChargingHandleSocket") if action else null
-	if not bindings["action_grip"]:bindings["action_grip"]=required_contract_node(visual,index,"action_grip")
+	if not bindings["action_grip"]:push_error("[DUSTLINE RIG] "+DATA[index].name+" ChargingHandleSocket must be a child of the real action node")
 	for key in ["primary","support","magazine","magazine_grip","action","action_grip"]:
 		if not bindings.get(key):bindings["valid"]=false
 	if magazine:bindings["magazine_rest"]=magazine.transform
 	var spare=bindings.get("spare_magazine") as Node3D
 	if spare:bindings["spare_rest"]=spare.transform;spare.visible=false
 	if action:bindings["action_rest"]=action.transform
-	attach_static_arms(root,index,bindings);attach_reload_arms(root,index,bindings);root.set_meta("rig_bindings",bindings)
-	print("[DUSTLINE RIG] ",DATA[index].name," exact_contract=",bindings.valid," skeletal_reload=",bindings.has("reload_anim"))
+	attach_static_arms(root,index,bindings);attach_reload_arms(root,index,bindings)
+	for key in ["arms_mount","right_arm","support_arm","reload_mount","reload_anim","reload_skeleton"]:
+		if not bindings.get(key):bindings["valid"]=false
+	if not bool(bindings.valid):
+		push_error("[DUSTLINE RIG] rejecting incomplete first-person contract for "+DATA[index].name+"; falling back instead of creating proxy nodes")
+		root.free();return null
+	root.set_meta("rig_bindings",bindings);print("[DUSTLINE RIG] ",DATA[index].name," exact_contract=true skeletal_reload=true")
 	return root
 
 static func make_utility(kind: String) -> Node3D:
@@ -208,7 +221,6 @@ static func fit_visual(root: Node3D,target_size: float):
 
 static func make_legacy(index: int,generate=false) -> Node3D:
 	if not generate:return load(LEGACY_VIEWMODEL_PATHS[index]).instantiate()
-	# Retain the old generated M4/AWP fallback for source-only emergency use.
 	if index<2:return load(LEGACY_VIEWMODEL_PATHS[index]).instantiate()
 	var root=Node3D.new();root.name="M4A1" if index==2 else "AWP";var donor=load("res://assets/rifle.glb").instantiate()
 	for part in donor.find_children("*","Node3D",true,false):
