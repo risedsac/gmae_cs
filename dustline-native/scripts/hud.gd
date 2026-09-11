@@ -52,7 +52,7 @@ func build_menu():
 	label_at(panel,"鼠标灵敏度",Vector2(615,234),18);var sensitivity=HSlider.new();sensitivity.position=Vector2(810,234);sensitivity.size=Vector2(240,28);sensitivity.min_value=.0006;sensitivity.max_value=.005;sensitivity.step=.0001;sensitivity.value=.002;sensitivity.value_changed.connect(func(v):game.player.sensitivity=v);panel.add_child(sensitivity)
 	label_at(panel,"主音量",Vector2(615,294),18);var volume=HSlider.new();volume.position=Vector2(810,294);volume.size=Vector2(240,28);volume.min_value=0;volume.max_value=1;volume.step=.01;volume.value=.65;volume.value_changed.connect(func(v):game.sound.set_volume(v));panel.add_child(volume)
 	label_at(panel,"WASD / Shift     移动 / 静步\nCtrl / Space       蹲伏 / 跳跃\nB / E                   购买 / 安拆包\nG / H                   手雷 / 烟雾弹",Vector2(615,350),18,Color(.68,.73,.73))
-	label_at(panel,"鼠标左 / 右键   射击 / 开镜\nR / 1 / 2            换弹 / 主副武器\nQ                        切换进攻路线\nEsc / Tab           暂停 / 战绩",Vector2(870,350),18,Color(.68,.73,.73))
+	label_at(panel,"鼠标左 / 右键   射击 / 开镜\nR / 1 / 2            换弹 / 主副武器\n滚轮 ↑ / ↓          循环切换武器\nEsc / Tab           暂停 / 战绩",Vector2(870,350),18,Color(.68,.73,.73))
 	label_at(panel,"5v5   /   A & B   /   先赢 5 回合",Vector2(0,604),16,gold);label_at(panel,"离线爆破   ·   沙漠双点",Vector2(850,604),14,Color(.49,.56,.57))
 
 func button(parent: Node,text_: String,pos: Vector2,size_: Vector2) -> Button:
@@ -85,7 +85,11 @@ func make_shop_preview(parent: Control):
 
 func shop_product_button(parent: Node,item: String,shortcut: int) -> Button:
 	var b=Button.new();b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.custom_minimum_size=Vector2(350,50);b.size_flags_horizontal=Control.SIZE_EXPAND_FILL;b.focus_mode=Control.FOCUS_ALL;b.add_theme_font_size_override("font_size",18);apply_button_style(b);parent.add_child(b)
-	b.pressed.connect(func():select_shop_item(item));b.set_meta("shortcut",shortcut);shop_item_buttons[item]=b;return b
+	b.pressed.connect(func():select_shop_item(item))
+	b.gui_input.connect(func(event):
+		if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed and event.double_click:
+			select_shop_item(item);game.buy(item);b.accept_event())
+	b.set_meta("shortcut",shortcut);shop_item_buttons[item]=b;return b
 
 func build_shop():
 	shop=Control.new();shop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);shop.mouse_filter=Control.MOUSE_FILTER_STOP;add_child(shop);shop.visible=false
@@ -107,14 +111,14 @@ func build_shop():
 	shop_detail_name=styled_label("",30,gold);right.add_child(shop_detail_name);shop_detail_meta=styled_label("",17,Color(.72,.77,.76));right.add_child(shop_detail_meta);shop_detail_state=styled_label("",18,ink);right.add_child(shop_detail_state)
 	make_shop_preview(right)
 	shop_buy_button=Button.new();shop_buy_button.custom_minimum_size.y=54;shop_buy_button.add_theme_font_size_override("font_size",20);apply_button_style(shop_buy_button);shop_buy_button.pressed.connect(func():game.buy(shop_selected));right.add_child(shop_buy_button)
-	var bottom=HBoxContainer.new();root.add_child(bottom);var hint=styled_label("1–7 快捷购买 · ↑↓/Tab 切换商品 · Enter 查看/购买 · B 返回战场",15,Color(.66,.72,.71));hint.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bottom.add_child(hint)
+	var bottom=HBoxContainer.new();root.add_child(bottom);var hint=styled_label("单击选中 · 双击购买 · 1–7 快捷购买 · B 返回战场",15,Color(.66,.72,.71));hint.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bottom.add_child(hint)
 	var close=Button.new();close.text="返回战场  [ B ]";close.custom_minimum_size=Vector2(245,45);apply_button_style(close);close.pressed.connect(func():game.toggle_buy());bottom.add_child(close)
 	shop.visibility_changed.connect(func():
 		if shop.visible:on_shop_opened()
 		elif preview_viewport:preview_viewport.render_target_update_mode=SubViewport.UPDATE_DISABLED)
 
 func on_shop_opened():
-	set_shop_feedback("选择商品；不可购买的原因会直接显示在商店内",true);select_shop_item(shop_selected);refresh_shop()
+	set_shop_feedback("选择商品；双击可直接购买，不可购买原因会显示在商店内",true);select_shop_item(shop_selected);refresh_shop()
 	var first=shop_item_buttons.get(shop_selected)
 	if is_instance_valid(first):first.grab_focus()
 
@@ -161,32 +165,44 @@ func _unhandled_input(event):
 func text_at(text_: String,pos: Vector2,size_: int,color: Color):
 	draw_string(font,pos+Vector2(1,2),text_,HORIZONTAL_ALIGNMENT_LEFT,-1,size_,Color(0,0,0,.65));draw_string(font,pos,text_,HORIZONTAL_ALIGNMENT_LEFT,-1,size_,color)
 
+func observed_actor():
+	var player=game.player
+	if player.hp<=0:
+		var target=player.spectator_actor()
+		if is_instance_valid(target):return target
+	return player
+
 func _draw():
 	if not game.started:return
-	var w=size.x;var h=size.y;var center=Vector2(w/2,h/2);var p=game.player
-	if p.scoped and p.weapon==3 and p.hp>0:scope_mask(center,minf(h*.41,w*.35))
+	var w=size.x;var h=size.y;var center=Vector2(w/2,h/2);var player=game.player;var p=observed_actor();var spectating=p!=player
+	var weapon_index=int(p.weapon);var shown_hp=int(p.hp);var shown_armor=0 if spectating else int(player.armor)
+	var shown_ammo=int(p.ammo) if spectating else int(player.ammo[weapon_index]);var shown_reserve="--" if spectating else "%03d"%int(player.reserve[weapon_index])
+	var shown_recoil=float(p.weapon_kick) if spectating else float(player.recoil)
+	if not spectating and player.scoped and weapon_index==3 and player.hp>0:scope_mask(center,minf(h*.41,w*.35))
 	draw_rect(Rect2(w/2-215,20,430,88),Color(.025,.04,.04,.86));var seconds=ceili(game.bomb_left if game.bomb_state=="planted" else (game.phase_left if game.phase=="freeze" else game.time_left))
 	text_at("%02d:%02d"%[seconds/60,seconds%60],Vector2(w/2-42,59),29,Color(1,.37,.22) if game.bomb_state=="planted" else ink);text_at("T  %d"%game.scores[0],Vector2(w/2-191,61),28,gold);text_at("%d  CT"%game.scores[1],Vector2(w/2+105,61),28,Color(.45,.76,1))
 	text_at("存活 %d"%game.team_alive(0).size(),Vector2(w/2-189,91),16,ink);text_at("第 %d 回合"%game.round_number,Vector2(w/2-46,91),15,ink);text_at("存活 %d"%game.team_alive(1).size(),Vector2(w/2+113,91),16,ink)
-	draw_rect(Rect2(26,h-103,333,75),Color(.025,.04,.04,.78));text_at("+",Vector2(43,h-53),32,gold);text_at(str(p.hp),Vector2(80,h-50),34,ink);text_at("护甲  %d"%p.armor,Vector2(191,h-54),21,ink)
-	draw_rect(Rect2(43,h-39,142,3),Color(.25,.29,.28));draw_rect(Rect2(43,h-39,142*p.hp/100.,3),gold);text_at("$%d   B 购买"%p.money,Vector2(29,h-124),22,gold)
-	text_at("HE %d   SMOKE %d   %s"%[p.grenades.he,p.grenades.smoke,"拆弹器" if p.kit else ""],Vector2(w-315,h-131),16,ink);draw_rect(Rect2(w-287,h-111,260,85),Color(.025,.04,.04,.78))
-	text_at(W.DATA[p.weapon].name,Vector2(w-264,h-86),16,gold);text_at("%02d"%p.ammo[p.weapon],Vector2(w-264,h-43),38,ink);text_at("/  %03d"%p.reserve[p.weapon],Vector2(w-191,h-47),22,Color(.65,.7,.68));text_at("1 主武器    2 手枪",Vector2(w-181,h-18),12,ink)
-	if p.hp>0 and not p.scoped and p.utility_left<=0:
-		var gap=5+p.recoil*12+Vector2(p.velocity.x,p.velocity.z).length()*1.2
+	draw_rect(Rect2(26,h-103,333,75),Color(.025,.04,.04,.78));text_at("+",Vector2(43,h-53),32,gold);text_at(str(shown_hp),Vector2(80,h-50),34,ink);text_at("护甲  %d"%shown_armor,Vector2(191,h-54),21,ink)
+	draw_rect(Rect2(43,h-39,142,3),Color(.25,.29,.28));draw_rect(Rect2(43,h-39,142*clampf(shown_hp/100.,0.,1.),3),gold)
+	text_at(("观战  "+str(p.callsign)) if spectating else ("$%d   B 购买"%player.money),Vector2(29,h-124),22,gold)
+	text_at("HE %d   SMOKE %d   %s"%[int(p.grenades.he),int(p.grenades.smoke),"拆弹器" if p.kit else ""],Vector2(w-315,h-131),16,ink);draw_rect(Rect2(w-287,h-111,260,85),Color(.025,.04,.04,.78))
+	text_at(W.DATA[weapon_index].name,Vector2(w-264,h-86),16,gold);text_at("%02d"%shown_ammo,Vector2(w-264,h-43),38,ink);text_at("/  "+shown_reserve,Vector2(w-191,h-47),22,Color(.65,.7,.68));text_at("滚轮 / 1 / 2 切枪",Vector2(w-181,h-18),12,ink)
+	if shown_hp>0 and (spectating or (not player.scoped and player.utility_left<=0)):
+		var gap=5+shown_recoil*12+Vector2(p.velocity.x,p.velocity.z).length()*1.2
 		for dir in [Vector2.UP,Vector2.DOWN,Vector2.LEFT,Vector2.RIGHT]:draw_line(center+dir*gap,center+dir*(gap+7),Color(.63,.95,.76),2)
-	if game.hit_marker>0:
+	if game.hit_marker>0 and not spectating:
 		for dir in [Vector2(-1,-1),Vector2(-1,1),Vector2(1,-1),Vector2(1,1)]:draw_line(center+dir*7,center+dir*13,ink,2)
-	if p.reload_left>0:progress_bar(center+Vector2(0,64),"正在换弹",1-p.reload_left/p.reload_duration)
-	if game.interaction_actor==p:progress_bar(center+Vector2(0,100),"安装 C4" if p.team==0 else "拆除 C4",game.interaction_progress/game.interaction_duration)
-	elif p.hp>0 and game.phase in ["live","planted"]:
-		if p==game.bomb_carrier and game.world.site_at(p.position)!="":text_at("按住 E 安装 C4",center+Vector2(-82,84),20,gold)
-		elif p.team==1 and game.bomb_state=="planted" and p.position.distance_to(game.bomb_position)<2.5:text_at("按住 E 拆除 C4",center+Vector2(-82,84),20,gold)
-	if game.hurt_overlay>0:
+	if float(p.reload_left)>0:
+		var duration=2.35 if spectating else maxf(player.reload_duration,.001);progress_bar(center+Vector2(0,64),"正在换弹",1-float(p.reload_left)/duration)
+	if not spectating and game.interaction_actor==player:progress_bar(center+Vector2(0,100),"安装 C4" if player.team==0 else "拆除 C4",game.interaction_progress/game.interaction_duration)
+	elif not spectating and player.hp>0 and game.phase in ["live","planted"]:
+		if player==game.bomb_carrier and game.world.site_at(player.position)!="":text_at("按住 E 安装 C4",center+Vector2(-82,84),20,gold)
+		elif player.team==1 and game.bomb_state=="planted" and player.position.distance_to(game.bomb_position)<2.5:text_at("按住 E 拆除 C4",center+Vector2(-82,84),20,gold)
+	if game.hurt_overlay>0 and not spectating:
 		var c=Color(.7,.09,.04,game.hurt_overlay*.6);draw_rect(Rect2(0,0,w,12),c);draw_rect(Rect2(0,h-12,w,12),c);draw_rect(Rect2(0,0,12,h),c);draw_rect(Rect2(w-12,0,12,h),c)
-	if p.hp<=0:
-		var allies=game.team_alive(p.team);text_at("观战 "+(allies[p.spectator_index%allies.size()].callsign if not allies.is_empty() else "本回合已阵亡"),Vector2(w/2-155,h-105),23,ink);text_at("点击切换队友 · 下一回合复活",Vector2(w/2-155,h-71),17,gold)
-	if game.phase=="freeze":text_at("购买阶段 · B 购买 · "+("你携带 C4" if p==game.bomb_carrier else "准备行动"),Vector2(w/2-175,142),20,gold)
+	if player.hp<=0:
+		text_at("观战 "+(str(p.callsign) if spectating else "本回合已阵亡"),Vector2(w/2-155,h-105),23,ink);text_at("点击切换队友 · 下一回合复活",Vector2(w/2-155,h-71),17,gold)
+	if game.phase=="freeze":text_at("购买阶段 · B 购买 · "+("你携带 C4" if player==game.bomb_carrier else "准备行动"),Vector2(w/2-175,142),20,gold)
 	if game.bomb_state=="planted":text_at(game.planted_site+" 点 C4 已安装",Vector2(w/2-88,140),20,Color(1,.44,.26))
 	if game.phase=="end":draw_rect(Rect2(center+Vector2(-290,-70),Vector2(580,145)),Color(.035,.045,.05,.94));text_at(("进攻方" if game.winner==0 else "防守方")+"获胜",center+Vector2(-105,-12),35,gold);text_at(game.round_reason+" · %.0f 秒后下一回合"%game.phase_left,center+Vector2(-165,38),20,ink)
 	if game.message_left>0:text_at(game.message,Vector2(maxf(240,w-510),183),17,ink)
@@ -211,12 +227,13 @@ func radar():
 	for rect in game.world.solids:draw_rect(Rect2(offset+rect.position*scale_,rect.size*scale_),Color(.46,.48,.40,.68))
 	for name_ in game.world.SITES:
 		var site=game.world.SITES[name_];text_at(name_,offset+Vector2(site.x,site.z)*scale_+Vector2(-5,5),16,gold)
-	var p=game.player;var pt=offset+Vector2(p.position.x,p.position.z)*scale_;var dir=Vector2(-sin(p.rotation.y),-cos(p.rotation.y));var side=Vector2(-dir.y,dir.x)
+	var player=game.player;var p=observed_actor();var pt=offset+Vector2(p.position.x,p.position.z)*scale_;var dir=Vector2(-sin(p.rotation.y),-cos(p.rotation.y));var side=Vector2(-dir.y,dir.x)
 	if p.hp>0:draw_colored_polygon(PackedVector2Array([pt+dir*7,pt-dir*4+side*4,pt-dir*4-side*4]),gold)
 	for bot in game.bots:
-		if bot.hp<=0:continue
-		var to=bot.position-p.position;var seen=(-p.global_basis.z).dot(to.normalized())>.5 and to.length()<40 and game.clear_sight(p.camera.global_position,bot.position+Vector3.UP*1.5)
-		if bot.team==p.team or (seen and p.hp>0):draw_circle(offset+Vector2(bot.position.x,bot.position.z)*scale_,3.3,Color(.37,.77,1) if bot.team==p.team else Color(.96,.36,.24))
+		if bot.hp<=0 or bot==p:continue
+		var to=bot.position-p.position;var eye=player.camera.global_position if p!=player else player.camera.global_position;var forward=-player.camera.global_basis.z if p!=player else -p.global_basis.z
+		var seen=forward.dot(to.normalized())>.5 and to.length()<40 and game.clear_sight(eye,bot.position+Vector3.UP*1.5)
+		if bot.team==p.team or seen:draw_circle(offset+Vector2(bot.position.x,bot.position.z)*scale_,3.3,Color(.37,.77,1) if bot.team==p.team else Color(.96,.36,.24))
 	if game.bomb_state=="planted" or (p.team==0 and game.bomb_state=="dropped"):draw_circle(offset+Vector2(game.bomb_position.x,game.bomb_position.z)*scale_,4,Color(1,.7,.2))
 
 func scoreboard(c: Vector2):
