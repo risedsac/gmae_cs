@@ -52,23 +52,19 @@ func install_recorded_sfx():
 	optional_replace("smoke_hiss",[SFX_ROOT+"smoke_hiss.wav",SFX_ROOT+"smoke_hiss.ogg"])
 	optional_replace("buy",[SFX_ROOT+"ui_confirm.wav",SFX_ROOT+"ui_confirm.ogg"])
 	for profile in RELOAD_PROFILES:
-		for event in ["mag_out","mag_in","action"]:
+		for event in ["mag_out","mag_in","action_pull","action_release"]:
 			var path=RELOAD_EVENT_ROOT+profile+"_"+event+".wav"
-			if ResourceLoader.exists(path):
-				reload_event_streams[profile+":"+event]=load(path)
+			if ResourceLoader.exists(path):reload_event_streams[profile+":"+event]=load(path)
 
 func optional_replace(key: String,paths: Array):
 	for path in paths:
 		if ResourceLoader.exists(path):
-			streams[key]=load(path)
-			print("[DUSTLINE AUDIO] ",key," <- ",path)
-			return
+			streams[key]=load(path);print("[DUSTLINE AUDIO] ",key," <- ",path);return
 
 func load_realistic_profile(sound: String):
 	var profile=str(REAL_PROFILE.get(sound,""))
 	if profile.is_empty():return
-	var loaded={"near":[],"world":[],"distant":[],"tail":[]}
-	var complete=true
+	var loaded={"near":[],"world":[],"distant":[],"tail":[]};var complete=true
 	for role in ["near","world","distant","tail"]:
 		for i in 4:
 			var path=REAL_AUDIO_ROOT+profile+"/"+role+"_"+str(i)+".wav"
@@ -77,23 +73,17 @@ func load_realistic_profile(sound: String):
 	if complete:
 		realistic_streams[sound]=loaded
 		print("[DUSTLINE AUDIO] multisample firearm profile ready: ",sound," -> ",profile," (4 dry/world/distant/tail takes)")
-	else:
-		push_warning("[DUSTLINE AUDIO] incomplete multisample profile for "+profile+"; using legacy four-variant fallback")
+	else:push_warning("[DUSTLINE AUDIO] incomplete multisample profile for "+profile+"; using legacy four-variant fallback")
 
-func set_volume(value: float):
-	AudioServer.set_bus_volume_db(0,linear_to_db(maxf(value,.001)))
+func set_volume(value: float):AudioServer.set_bus_volume_db(0,linear_to_db(maxf(value,.001)))
 
 func choose_real_variant(sound: String,role: String) -> int:
 	if not realistic_streams.has(sound):return -1
 	var array_: Array=realistic_streams[sound].get(role,[])
 	if array_.is_empty():return -1
-	var key=sound+":"+role
-	var previous=int(last_real_variant.get(key,-1))
-	var variant=randi()%array_.size()
-	if array_.size()>1 and variant==previous:
-		variant=(variant+1+randi()%(array_.size()-1))%array_.size()
-	last_real_variant[key]=variant
-	return variant
+	var key=sound+":"+role;var previous=int(last_real_variant.get(key,-1));var variant=randi()%array_.size()
+	if array_.size()>1 and variant==previous:variant=(variant+1+randi()%(array_.size()-1))%array_.size()
+	last_real_variant[key]=variant;return variant
 
 func free_ui_player() -> AudioStreamPlayer:
 	for p in ui_players:
@@ -110,28 +100,38 @@ func play_3d_stream(stream: AudioStream,pos: Vector3,volume: float,cutoff=20500.
 	var p=free_3d_player();p.stop();p.global_position=pos;p.stream=stream;p.volume_db=volume;p.pitch_scale=1.0
 	p.attenuation_filter_cutoff_hz=cutoff;p.attenuation_filter_db=filter_db;p.play();return p
 
+func environment_tail_offset(pos: Vector3) -> float:
+	# Cheap runtime openness probe: unlike the old baked reflection mix, the tail
+	# level now follows the current space. More nearby surfaces => stronger tail;
+	# open exterior space => substantially less tail.
+	var game=get_parent()
+	if not game or not game.has_method("ray"):return -4.
+	var directions=[Vector3.UP,Vector3(1,0,0),Vector3(-1,0,0),Vector3(0,0,1),Vector3(0,0,-1),Vector3(0,.45,-1).normalized()]
+	var blocked=0
+	for dir in directions:
+		if not game.ray(pos,pos+dir*12.,1).is_empty():blocked+=1
+	return lerpf(-8.,2.,float(blocked)/float(directions.size()))
+
 func play_real_tail_local(sound: String,index: int,volume: float):
 	var tails: Array=realistic_streams[sound].get("tail",[])
-	if index>=0 and index<tails.size():play_ui_stream(tails[index],volume+SHOT_TAIL_DB)
+	if index<0 or index>=tails.size():return
+	var game=get_parent();var pos=game.player.camera.global_position if is_instance_valid(game.player) else Vector3.ZERO
+	play_ui_stream(tails[index],volume+SHOT_TAIL_DB+environment_tail_offset(pos))
 
 func play_real_tail_at(sound: String,index: int,pos: Vector3,volume: float,blocked: bool,distance: float):
 	var tails: Array=realistic_streams[sound].get("tail",[])
 	if index<0 or index>=tails.size():return
 	var cutoff=3200. if blocked else (8000. if distance>24 else 12500.)
-	play_3d_stream(tails[index],pos,volume+SHOT_TAIL_DB-(4. if blocked else 0.),cutoff,-16.)
+	play_3d_stream(tails[index],pos,volume+SHOT_TAIL_DB+environment_tail_offset(pos)-(4. if blocked else 0.),cutoff,-16.)
 
 func play_at(sound: String,pos: Vector3,volume=-6.):
 	var game=get_parent();var distance=0.;var blocked=false
 	if sound in GUNS and is_instance_valid(game.player):
 		var ear=game.player.camera.global_position;distance=ear.distance_to(pos);blocked=not game.ray(ear,pos,1).is_empty()
 	if sound in GUNS and realistic_streams.has(sound):
-		var role="distant" if distance>24 else "world"
-		var variant=choose_real_variant(sound,role)
-		var options: Array=realistic_streams[sound][role]
+		var role="distant" if distance>24 else "world";var variant=choose_real_variant(sound,role);var options: Array=realistic_streams[sound][role]
 		var cutoff=2200. if blocked else (9000. if distance>26 else 20500.)
-		play_3d_stream(options[variant],pos,volume-(7. if blocked else 0.),cutoff,-20. if blocked else -12.)
-		play_real_tail_at(sound,variant,pos,volume,blocked,distance)
-		return
+		play_3d_stream(options[variant],pos,volume-(7. if blocked else 0.),cutoff,-20. if blocked else -12.);play_real_tail_at(sound,variant,pos,volume,blocked,distance);return
 	var suffix=""
 	if sound in GUNS:
 		if blocked:suffix="_occluded";volume-=8
@@ -140,25 +140,18 @@ func play_at(sound: String,pos: Vector3,volume=-6.):
 
 func local(sound: String,volume=-6.) -> AudioStreamPlayer:
 	if sound in GUNS and realistic_streams.has(sound):
-		var variant=choose_real_variant(sound,"near")
-		var options: Array=realistic_streams[sound]["near"]
-		var dry=play_ui_stream(options[variant],volume,1.0)
+		var variant=choose_real_variant(sound,"near");var options: Array=realistic_streams[sound]["near"];var dry=play_ui_stream(options[variant],volume,1.0)
 		play_real_tail_local(sound,variant,volume)
-		# Mechanical action stays a separate, very quiet layer. It can be tuned or
-		# replaced independently and is never baked into the field recording.
 		if streams.has("shot_mech"):play_ui_stream(streams["shot_mech"],volume+SHOT_MECHANICAL_DB,randf_range(.985,1.015))
 		if not logged_local_guns.has(sound):
-			logged_local_guns[sound]=true
-			print("[DUSTLINE AUDIO PLAY] ",sound," variant=",variant," dry=",dry.stream.resource_path," tail=separate")
+			logged_local_guns[sound]=true;print("[DUSTLINE AUDIO PLAY] ",sound," variant=",variant," dry=",dry.stream.resource_path," tail=runtime-space")
 		return dry
 	return play_ui_stream(select_stream(sound),volume,randf_range(.994,1.006) if sound in GUNS else 1.)
 
 func reload_event(weapon_index: int,event: String,volume=-13.) -> AudioStreamPlayer:
 	if weapon_index<0 or weapon_index>=RELOAD_PROFILES.size():return local("equip",volume)
-	var profile=RELOAD_PROFILES[weapon_index]
-	var key=profile+":"+event
-	if reload_event_streams.has(key):
-		return play_ui_stream(reload_event_streams[key],volume,1.0)
+	var profile=RELOAD_PROFILES[weapon_index];var key=profile+":"+event
+	if reload_event_streams.has(key):return play_ui_stream(reload_event_streams[key],volume,1.0)
 	return local("equip",volume-4.)
 
 func silence():
