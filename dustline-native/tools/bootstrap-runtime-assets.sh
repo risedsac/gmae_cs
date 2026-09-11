@@ -55,9 +55,20 @@ for file in \
   fetch_exact "$STEEL/assets/models/djmaesen_smg45/$file" "$ARMS_ROOT/$file"
 done
 
-# Reviewed runtime identities from the upstream asset audit.
+# Verify the immutable upstream assets before applying the local marker-only
+# first-person adapter. The patch never changes visible mesh/mechanism data.
 check_sha256 "579CB38E8F861ECAC5B7C7739946C4620046FFFAF94EE5E073CB69B913DB72FC" "$REAL_ROOT/fallback/p226_reloadable.glb"
 check_sha256 "FFA2FE9DD07771650D55D60FAAC6715336ECD087D57373BA5C4139B3E0C73807" "$REAL_ROOT/fallback/awm_reloadable.glb"
+
+# The upstream supplemental P226/AWM exports intentionally omit the two static
+# first-person grip markers required by Dustline. Re-importing cannot create
+# absent nodes, so inject calibrated root-local marker nodes before Godot sees
+# the files. Real Magazine/ChargingHandle geometry and their sockets remain the
+# original reviewed upstream nodes.
+python3 "$ROOT_DIR/tools/patch_weapon_grip_sockets.py" \
+  --profile p226 "$REAL_ROOT/fallback/p226_reloadable.glb"
+python3 "$ROOT_DIR/tools/patch_weapon_grip_sockets.py" \
+  --profile awm "$REAL_ROOT/fallback/awm_reloadable.glb"
 
 find_godot() {
   local candidate=""
