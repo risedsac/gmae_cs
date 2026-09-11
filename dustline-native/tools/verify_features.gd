@@ -12,6 +12,12 @@ func _check(condition: bool,message: String) -> void:
 	else:
 		failures.append(message);push_error("[DUSTLINE FEATURE] FAIL: "+message)
 
+func _has_mouse_binding(action: StringName,button: MouseButton) -> bool:
+	if not InputMap.has_action(action):return false
+	for event in InputMap.action_get_events(action):
+		if event is InputEventMouseButton and event.button_index==button:return true
+	return false
+
 func _prepare_player_weapon(player,index: int,rounds: int) -> void:
 	player.cancel_reload();player.utility_left=0.;player.owned[index]=true;player.weapon=index
 	player.ammo[index]=rounds;player.reserve[index]=maxi(int(W.DATA[index].reserve),1)
@@ -52,6 +58,8 @@ func _run() -> void:
 	_check(player.reload_event_players.is_empty(),"switching weapon stops reload event audio")
 
 	# Wheel cycling uses the same switch path and only owned weapons.
+	_check(_has_mouse_binding("weapon_prev",MOUSE_BUTTON_WHEEL_UP),"wheel-up input action is registered")
+	_check(_has_mouse_binding("weapon_next",MOUSE_BUTTON_WHEEL_DOWN),"wheel-down input action is registered")
 	player.owned=[false,true,true,false];player.primary=2;player.weapon=1
 	player.cycle_owned_weapon(1);_check(player.weapon==2,"wheel-down cycles pistol -> owned primary")
 	player.cycle_owned_weapon(-1);_check(player.weapon==1,"wheel-up cycles owned primary -> pistol")
@@ -75,7 +83,7 @@ func _run() -> void:
 	var before_money=player.money
 	if he_button:he_button.emit_signal("gui_input",double_click)
 	_check(player.grenades.he==1,"shop left double-click buys selected product")
-	_check(player.money==before_money-int(game.BUY_CATALOG.he.price),"one double-click charges exactly once")
+	_check(player.money==before_money-int(game.BUY_CATALOG["he"].price),"one double-click charges exactly once")
 	var after_first=player.money
 	if he_button:he_button.emit_signal("gui_input",double_click)
 	_check(player.money==after_first,"repeat double-click respects already-owned validation")
@@ -93,6 +101,8 @@ func _run() -> void:
 			_check(player.weapon_anchor.visible,"spectator first-person weapon is visible")
 			_check(player.models[int(ally.weapon)].visible,"spectator viewmodel matches teammate weapon")
 			_check(not ally.model.visible and not ally.gun.visible,"spectated teammate third-person body and gun are hidden from view")
+			var camera_forward=(-player.camera.global_basis.z).normalized();var gun_forward=(-ally.gun.global_basis.orthonormalized().z).normalized()
+			_check(camera_forward.dot(gun_forward)>.999,"spectator camera follows teammate actual weapon aim basis")
 			ally.reload_left=1.0;ally.ammo=0;player.update_spectator(.016)
 			_check(player.spectator_last_reload,"spectator mirrors teammate reload state")
 			ally.reload_left=0.;ally.shot_count+=1;ally.flash_clock=.04;player.update_spectator(.016)
@@ -100,6 +110,11 @@ func _run() -> void:
 			if allies.size()>1:
 				var old=ally;player.spectator_index=1;player.update_spectator(.016)
 				_check(old.model.visible and old.gun.visible,"switching spectator target restores previous third-person model")
+				ally=player.spectator_actor()
+			if is_instance_valid(ally):
+				var dying=ally;dying.hp=0;player.update_spectator(.016)
+				_check(dying.model.visible,"spectated target death restores third-person body visibility")
+				dying.hp=100;dying.model.visible=true;dying.gun.visible=true
 			player.clear_spectator_target()
 			_check(old_or_current_visible(allies),"leaving spectator target restores third-person visibility")
 
