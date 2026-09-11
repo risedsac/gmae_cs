@@ -5,7 +5,11 @@ ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 # First build/download the complete audio + utility set using the normal installer.
-bash "$ROOT_DIR/tools/install-realistic-assets.sh" "${1:-}" 
+if [[ $# -ge 1 && -n "${1:-}" ]]; then
+  bash "$ROOT_DIR/tools/install-realistic-assets.sh" "$1"
+else
+  bash "$ROOT_DIR/tools/install-realistic-assets.sh"
+fi
 
 # Pin the first-person contract-critical files to the reviewed Steel Tide revision.
 # This avoids upstream-main drift silently changing socket names/hierarchies.
