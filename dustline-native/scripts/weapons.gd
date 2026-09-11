@@ -47,12 +47,17 @@ static func make(index: int,generate=false) -> Node3D:
 	return make_legacy(index,generate)
 
 static func make_player_viewmodel(index: int) -> Node3D:
-	if index==0 and imported_resource(AUTHORED_AK_VIEWMODEL):
-		var resource=ResourceLoader.load(AUTHORED_AK_VIEWMODEL,"",ResourceLoader.CACHE_MODE_REPLACE)
-		if resource is PackedScene:
-			var root=Node3D.new();root.name="AK-47 Authored Viewmodel";root.set_meta("authored_viewmodel",true);root.set_meta("asset_source",AUTHORED_AK_VIEWMODEL);root.set_meta("rig_bindings",{})
-			var visual=(resource as PackedScene).instantiate();visual.name="FPSArmsAK74";root.add_child(visual)
-			print("[DUSTLINE VIEWMODEL] AUTHORED AK-74M arms <- ",AUTHORED_AK_VIEWMODEL);return root
+	# AK has an independent authored first-person animation path. Do not apply the
+	# P9/M4/AWP detachable-mechanism socket contract to it.
+	if index==0:
+		if imported_resource(AUTHORED_AK_VIEWMODEL):
+			var resource=ResourceLoader.load(AUTHORED_AK_VIEWMODEL,"",ResourceLoader.CACHE_MODE_REPLACE)
+			if resource is PackedScene:
+				var root=Node3D.new();root.name="AK-47 Authored Viewmodel";root.set_meta("authored_viewmodel",true);root.set_meta("asset_source",AUTHORED_AK_VIEWMODEL);root.set_meta("rig_bindings",{})
+				var visual=(resource as PackedScene).instantiate();visual.name="FPSArmsAK74";root.add_child(visual)
+				print("[DUSTLINE VIEWMODEL] AUTHORED AK-74M arms <- ",AUTHORED_AK_VIEWMODEL);return root
+		var ak_fallback=make_legacy(index,false);ak_fallback.set_meta("authored_viewmodel",false);ak_fallback.set_meta("rig_bindings",{});push_warning("[DUSTLINE VIEWMODEL] authored AK path unavailable; using independent legacy AK viewmodel")
+		return ak_fallback
 	var upgraded=load_realistic_weapon(index,true)
 	if upgraded:upgraded.set_meta("authored_viewmodel",false);return upgraded
 	var fallback=make_legacy(index,false);fallback.set_meta("authored_viewmodel",false);fallback.set_meta("rig_bindings",{});return fallback
@@ -111,6 +116,16 @@ static func find_animation_player(node: Node):
 		if found:return found
 	return null
 
+static func find_skeleton(node: Node):
+	# Blender armatures may import as a named Node3D wrapper with the actual
+	# Skeleton3D nested below it. Match the upstream runtime contract by type,
+	# rather than casting the named wrapper itself.
+	if node is Skeleton3D:return node
+	for child in node.get_children():
+		var found=find_skeleton(child)
+		if found:return found
+	return null
+
 static func align_mount_marker(mount: Node3D,marker: Node3D,target_in_root: Transform3D):
 	var marker_in_mount=root_relative_transform(marker,mount);var marker_rotation=marker_in_mount.basis.orthonormalized();var target_rotation=target_in_root.basis.orthonormalized()
 	mount.basis=target_rotation*marker_rotation.inverse();mount.position=target_in_root.origin-mount.basis*marker_in_mount.origin
@@ -146,10 +161,10 @@ static func attach_reload_arms(root: Node3D,index: int,bindings: Dictionary):
 	var mount=Node3D.new();mount.name="ReloadArmsMount";root.add_child(mount)
 	var rig=(res as PackedScene).instantiate();rig.name="ReloadArmsRig";mount.add_child(rig)
 	var right_grip=find_exact(rig,"RightGripFrame") as Node3D;var left_palm=find_exact(rig,"LeftPalmFrame") as Node3D;var left_mag=find_exact(rig,"LeftSidearmMagazineAnchorFrame") as Node3D
-	var skeleton=find_exact(rig,"ReloadArmsSkeleton") as Skeleton3D;var long_mesh=find_exact(rig,"LongGunReloadForearmsMesh") as Node3D;var side_mesh=find_exact(rig,"SidearmReloadForearmsMesh") as Node3D
-	var full_audit=find_exact(rig,"FullReloadArmsAuditMesh") as Node3D;var compatibility=find_exact(rig,"ReloadArmsMesh") as Node3D;var anim=find_animation_player(rig)
+	var skeleton=find_skeleton(rig) as Skeleton3D;var long_mesh=find_exact(rig,"LongGunReloadForearmsMesh") as Node3D;var side_mesh=find_exact(rig,"SidearmReloadForearmsMesh") as Node3D
+	var full_audit=find_exact(rig,"FullReloadArmsAuditMesh") as Node3D;var compatibility=find_exact(rig,"ReloadArmsMesh") as Node3D;var anim=find_animation_player(rig) as AnimationPlayer
 	if not right_grip or not left_palm or not skeleton or not anim:
-		push_error("[DUSTLINE RIG] animated reload arm contract missing for "+DATA[index].name);mount.queue_free();return
+		push_error("[DUSTLINE RIG] animated reload arm contract missing for "+DATA[index].name+" right_grip="+str(right_grip!=null)+" left_palm="+str(left_palm!=null)+" skeleton="+str(skeleton!=null)+" anim="+str(anim!=null));mount.queue_free();return
 	var tactical=reload_clip(index,false);var empty=reload_clip(index,true)
 	if not anim.has_animation(tactical) or not anim.has_animation(empty):
 		push_error("[DUSTLINE RIG] missing authored reload clips for "+DATA[index].name);mount.queue_free();return
@@ -169,6 +184,8 @@ static func load_realistic_weapon(index: int,with_player_arms=false) -> Node3D:
 	var visual=(resource as PackedScene).instantiate();var root=Node3D.new();root.name=DATA[index].name;root.set_meta("asset_source",path);root.set_meta("weapon_index",index)
 	visual.name="RealisticVisual";visual.scale=Vector3.ONE*REALISTIC_SCALE[index];root.add_child(visual)
 	if not with_player_arms:return root
+	# Player AK never reaches this generic path; its animation contract is independent.
+	if index==0:return root
 	var bindings={"visual":visual,"valid":true}
 	bindings["primary"]=required_contract_node(visual,index,"primary");bindings["support"]=required_contract_node(visual,index,"support")
 	bindings["magazine"]=required_contract_node(visual,index,"magazine");bindings["spare_magazine"]=optional_contract_node(visual,index,"spare_magazine")
