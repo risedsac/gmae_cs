@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 const W=preload("res://scripts/weapons.gd")
 const ACTION_TRAVEL=[.075,.085,.070,.135]
+const BOT_RELOAD_DURATION=2.35
 
 var game
 var team=0
@@ -13,6 +14,10 @@ var kit=false
 var scoped=false
 var rescope_after_shot=false
 var spectator_index=0
+var spectator_target=null
+var spectator_last_shot_count=-1
+var spectator_last_reload=false
+var spectator_reload_weapon=-1
 var camera: Camera3D
 var capsule: CollisionShape3D
 var view: SubViewport
@@ -66,7 +71,16 @@ func _ready():
 	floor_snap_length=.25;floor_max_angle=deg_to_rad(44)
 	camera=Camera3D.new();camera.position.y=1.63;camera.fov=80;camera.near=.055;camera.far=160;add_child(camera);camera.current=true
 	var listener=AudioListener3D.new();camera.add_child(listener);listener.make_current()
-	build_viewmodel()
+	ensure_wheel_inputs();build_viewmodel()
+
+func ensure_wheel_inputs():
+	for pair in [["weapon_prev",MOUSE_BUTTON_WHEEL_UP],["weapon_next",MOUSE_BUTTON_WHEEL_DOWN]]:
+		if not InputMap.has_action(pair[0]):InputMap.add_action(pair[0])
+		var already=false
+		for existing in InputMap.action_get_events(pair[0]):
+			if existing is InputEventMouseButton and existing.button_index==pair[1]:already=true
+		if not already:
+			var event=InputEventMouseButton.new();event.button_index=pair[1];InputMap.action_add_event(pair[0],event)
 
 func build_viewmodel():
 	var layer=CanvasLayer.new();layer.layer=1;add_child(layer)
@@ -118,12 +132,16 @@ func animation_length(index: int,state: String,fallback: float) -> float:
 	return fallback
 
 func play_view_animation(state: String,lock_animation=true,speed_scale=1.0):
-	if not viewmodel_is_authored(weapon) or weapon>=view_anims.size():return
-	var anim=view_anims[weapon];var clip=W.viewmodel_clip(state)
+	play_view_animation_for(weapon,state,lock_animation,speed_scale)
+
+func play_view_animation_for(index: int,state: String,lock_animation=true,speed_scale=1.0):
+	if not viewmodel_is_authored(index) or index>=view_anims.size():return
+	var anim=view_anims[index];var clip=W.viewmodel_clip(state)
 	if not anim or clip.is_empty() or not anim.has_animation(clip):return
 	if anim.current_animation!=clip or state in ["draw","reload","fire"]:anim.play(clip,.045,speed_scale)
-	view_anim_state=state
-	if lock_animation:view_anim_lock=maxf(view_anim_lock,anim.get_animation(clip).length/maxf(absf(speed_scale),.01))
+	if index==weapon:
+		view_anim_state=state
+		if lock_animation:view_anim_lock=maxf(view_anim_lock,anim.get_animation(clip).length/maxf(absf(speed_scale),.01))
 
 func rig_for(index: int) -> Dictionary:
 	return rigs[index] if index>=0 and index<rigs.size() else {}
@@ -148,9 +166,6 @@ func reset_weapon_rig(index: int):
 	if action and rig.has("action_rest"):action.transform=rig.action_rest
 	var reload_mount=rig.get("reload_mount") as Node3D;var support_arm=rig.get("support_arm") as Node3D
 	if index>0:
-		# The authored skeletal forearm remains the normal support arm. This lets
-		# idle/move/draw/fire use real shoulder/elbow/wrist bones instead of moving
-		# a rigid SupportArm root; reload clips take over the same skeleton.
 		if reload_mount:reload_mount.visible=true
 		if support_arm:support_arm.visible=false
 		prepare_non_ak_rest_pose(index)
@@ -167,11 +182,34 @@ func cancel_reload():
 	stop_reload_event_audio();reload_left=0;reload_duration=0;reload_event_cursor=0;reload_clip_name=""
 	if weapon>=0:reset_weapon_rig(weapon)
 
+func clear_spectator_target():
+	if is_instance_valid(spectator_target):
+		if is_instance_valid(spectator_target.model):spectator_target.model.visible=spectator_target.hp>0
+		if is_instance_valid(spectator_target.gun):spectator_target.gun.visible=spectator_target.hp>0
+		if is_instance_valid(spectator_target.friendly_label):spectator_target.friendly_label.visible=spectator_target.hp>0 and spectator_target.team==game.player_team
+	if spectator_reload_weapon>=0:reset_weapon_rig(spectator_reload_weapon)
+	spectator_target=null;spectator_last_shot_count=-1;spectator_last_reload=false;spectator_reload_weapon=-1
+
+func set_spectator_target(ally):
+	if spectator_target==ally:return
+	clear_spectator_target();spectator_target=ally
+	if not is_instance_valid(ally):return
+	spectator_last_shot_count=ally.shot_count;spectator_reload_weapon=ally.weapon
+	reset_weapon_rig(ally.weapon)
+	if is_instance_valid(ally.model):ally.model.visible=false
+	if is_instance_valid(ally.gun):ally.gun.visible=false
+	if is_instance_valid(ally.friendly_label):ally.friendly_label.visible=false
+	print("[DUSTLINE SPECTATE] target=",ally.callsign," weapon=",W.DATA[ally.weapon].name)
+
+func spectator_actor():
+	return spectator_target if hp<=0 and is_instance_valid(spectator_target) and spectator_target.hp>0 else null
+
 func reset_at(pos: Vector3):
+	clear_spectator_target()
 	global_position=pos+Vector3.UP*.08;velocity=Vector3.ZERO;rotation.y=0;pitch=0;scoped=false;rescope_after_shot=false;spectator_index=0
 	if hp<=0:armor=0
 	hp=100;ammo=[30,12,30,5];reserve=[90,48,90,25];protection=0;dead_left=0
-	collision_layer=2;collision_mask=1|4;camera.position=Vector3(0,1.63,0);camera.rotation=Vector3.ZERO
+	collision_layer=2;collision_mask=1|4;camera.position=Vector3(0,1.63,0);camera.rotation=Vector3.ZERO;camera.fov=80
 	cancel_reload();recoil=0;kick_position=Vector3.ZERO;kick_velocity=Vector3.ZERO;draw_left=0;flash_time=0;shot_cooldown=0;shot_queued=false;reload_queued=false
 	view_anim_lock=0;view_anim_state="";utility_left=0;utility_kind="";utility_thrown=false
 	for i in range(rigs.size()):reset_weapon_rig(i)
@@ -183,11 +221,14 @@ func reset_at(pos: Vector3):
 func _unhandled_input(event):
 	if not game.active:return
 	if hp<=0:
-		if event.is_action_pressed("fire"):spectator_index+=1
+		if event.is_action_pressed("fire"):
+			spectator_index+=1;clear_spectator_target()
 		return
 	if game.hud.shop.visible:return
 	if event is InputEventMouseMotion and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED:
 		var modifier=.32 if scoped else 1.;rotate_y(-event.relative.x*sensitivity*modifier);pitch=clampf(pitch-event.relative.y*sensitivity*modifier,-1.48,1.48);sway+=event.relative*.0006
+	if event.is_action_pressed("weapon_prev"):cycle_owned_weapon(-1);return
+	if event.is_action_pressed("weapon_next"):cycle_owned_weapon(1);return
 	if event.is_action_pressed("fire"):shot_queued=true
 	if event.is_action_pressed("reload"):reload_queued=true
 	if event.is_action_pressed("rifle") and primary>=0:switch_weapon(primary)
@@ -195,6 +236,19 @@ func _unhandled_input(event):
 	if event.is_action_pressed("scope") and weapon==3 and utility_left<=0:scoped=not scoped;rescope_after_shot=false
 	if event.is_action_pressed("he"):begin_utility("he")
 	if event.is_action_pressed("smoke_grenade"):begin_utility("smoke")
+
+func cycle_owned_weapon(direction: int):
+	var order: Array[int]=[]
+	if primary>=0 and primary<owned.size() and owned[primary]:order.append(primary)
+	if owned[1]:order.append(1)
+	for index in 4:
+		if owned[index] and index not in order:order.append(index)
+	if order.size()<2:return
+	var current=order.find(weapon)
+	if current<0:current=0
+	var next=(current+direction)%order.size()
+	if next<0:next+=order.size()
+	switch_weapon(order[next])
 
 func begin_utility(kind: String):
 	if utility_left>0 or reload_left>0 or hp<=0 or grenades.get(kind,0)<=0 or game.phase not in ["live","planted"]:return
@@ -220,7 +274,7 @@ func equip_primary(index: int):
 	primary=index;ammo[index]=capacities[index];reserve[index]=W.DATA[index].reserve;switch_weapon(index)
 
 func switch_weapon(index: int):
-	if not owned[index] or index==weapon or utility_left>0:return
+	if index<0 or index>=owned.size() or not owned[index] or index==weapon or utility_left>0:return
 	cancel_reload();reload_queued=false;shot_queued=false;weapon=index;scoped=false;rescope_after_shot=false;view_anim_lock=0;view_anim_state=""
 	var draw_duration=minf(animation_length(index,"draw",.28),.65) if viewmodel_is_authored(index) else .28
 	draw_left=draw_duration;shot_cooldown=draw_duration
@@ -228,18 +282,24 @@ func switch_weapon(index: int):
 	if viewmodel_is_authored(index):play_view_animation("draw",true,maxf(animation_length(index,"draw",draw_duration)/maxf(draw_duration,.01),1.))
 	game.sound.local("equip",-20)
 
-func start_non_ak_reload_rig():
-	var rig=rig_for(weapon)
-	if rig.is_empty() or not bool(rig.get("valid",false)):
-		push_error("[DUSTLINE RELOAD] explicit weapon rig unavailable for "+W.DATA[weapon].name);return
+func start_non_ak_reload_rig_for(index: int,empty_reload: bool) -> bool:
+	var rig=rig_for(index)
+	if rig.is_empty() or not bool(rig.get("valid",false)):return false
 	var anim=rig.get("reload_anim") as AnimationPlayer;var mount=rig.get("reload_mount") as Node3D;var support_arm=rig.get("support_arm") as Node3D
-	reload_clip_name=W.reload_clip(weapon,reload_empty)
-	if anim and not reload_clip_name.is_empty() and anim.has_animation(reload_clip_name):
+	var clip=W.reload_clip(index,empty_reload)
+	if anim and not clip.is_empty() and anim.has_animation(clip):
 		if mount:mount.visible=true
 		if support_arm:support_arm.visible=false
-		anim.play(reload_clip_name,0.0);anim.seek(0.0,true);anim.pause()
+		anim.play(clip,0.0);anim.seek(0.0,true);anim.pause();return true
+	return false
+
+func start_non_ak_reload_rig():
+	reload_clip_name=W.reload_clip(weapon,reload_empty)
+	if start_non_ak_reload_rig_for(weapon,reload_empty):
 		print("[DUSTLINE RELOAD] ",W.DATA[weapon].name," clip=",reload_clip_name," mechanism=real")
-	else:push_error("[DUSTLINE RELOAD] missing skeletal clip "+reload_clip_name+" for "+W.DATA[weapon].name)
+	else:
+		reload_clip_name="procedural_fallback"
+		push_warning("[DUSTLINE RELOAD] "+W.DATA[weapon].name+" rig unavailable; using visible procedural fallback. Run tools/bootstrap-runtime-assets.sh to restore authored reload animation.")
 
 func request_reload():
 	if utility_left>0 or reload_left>0 or ammo[weapon]==capacities[weapon] or reserve[weapon]<=0:return
@@ -249,8 +309,6 @@ func request_reload():
 	if viewmodel_is_authored(weapon):play_view_animation("reload",true,1.)
 	else:start_non_ak_reload_rig()
 
-func transform_between(node: Node3D,ancestor: Node3D) -> Transform3D:return ancestor.global_transform.affine_inverse()*node.global_transform
-
 func set_node_from_root_transform(node: Node3D,root: Node3D,target: Transform3D):
 	var parent=node.get_parent() as Node3D
 	if parent:node.transform=(root.global_transform.affine_inverse()*parent.global_transform).affine_inverse()*target
@@ -259,15 +317,15 @@ func align_mechanism_grip_to_hand(node: Node3D,grip_marker: Node3D,hand_marker: 
 	var grip_in_node=node.global_transform.affine_inverse()*grip_marker.global_transform;var target_in_root=root.global_transform.affine_inverse()*hand_marker.global_transform
 	set_node_from_root_transform(node,root,target_in_root*grip_in_node.affine_inverse())
 
-func reload_hand_marker(rig: Dictionary) -> Node3D:
-	if weapon==1:return rig.get("reload_mag_anchor") as Node3D
+func reload_hand_marker_for(index: int,rig: Dictionary) -> Node3D:
+	if index==1:return rig.get("reload_mag_anchor") as Node3D
 	return rig.get("reload_left_palm") as Node3D
 
-func update_real_magazine(rig: Dictionary,t: float):
-	var magazine=rig.get("magazine") as Node3D;var spare=rig.get("spare_magazine") as Node3D;var grip=rig.get("magazine_grip") as Node3D;var hand=reload_hand_marker(rig)
+func update_real_magazine_for(index: int,rig: Dictionary,t: float):
+	var magazine=rig.get("magazine") as Node3D;var spare=rig.get("spare_magazine") as Node3D;var grip=rig.get("magazine_grip") as Node3D;var hand=reload_hand_marker_for(index,rig)
 	if not magazine or not grip or not hand:return
 	if t<.18:magazine.visible=true
-	elif t<.43:magazine.visible=true;align_mechanism_grip_to_hand(magazine,grip,hand,models[weapon])
+	elif t<.43:magazine.visible=true;align_mechanism_grip_to_hand(magazine,grip,hand,models[index])
 	elif t<.49:
 		magazine.visible=false
 		if spare:spare.visible=false
@@ -275,19 +333,20 @@ func update_real_magazine(rig: Dictionary,t: float):
 		magazine.visible=false
 		if spare:
 			spare.visible=true
-			var grip_in_mag=magazine.global_transform.affine_inverse()*grip.global_transform;var target_in_root=models[weapon].global_transform.affine_inverse()*hand.global_transform
-			set_node_from_root_transform(spare,models[weapon],target_in_root*grip_in_mag.affine_inverse())
+			var grip_in_mag=magazine.global_transform.affine_inverse()*grip.global_transform;var target_in_root=models[index].global_transform.affine_inverse()*hand.global_transform
+			set_node_from_root_transform(spare,models[index],target_in_root*grip_in_mag.affine_inverse())
 	else:
-		magazine.transform=rig.magazine_rest;magazine.visible=true
+		if rig.has("magazine_rest"):magazine.transform=rig.magazine_rest
+		magazine.visible=true
 		if spare:spare.visible=false
 
-func update_real_action(rig: Dictionary,t: float):
+func update_real_action_for(index: int,rig: Dictionary,t: float):
 	var action=rig.get("action") as Node3D
 	if not action or not rig.has("action_rest"):return
 	action.transform=rig.action_rest
-	var start=.76 if weapon==3 else .80;var end=.94
+	var start=.76 if index==3 else .80;var end=.94
 	if t>=start and t<=end:
-		var phase=clampf((t-start)/maxf(end-start,.001),0.,1.);action.position+=Vector3(0,0,sin(phase*PI)*ACTION_TRAVEL[weapon])
+		var phase=clampf((t-start)/maxf(end-start,.001),0.,1.);action.position+=Vector3(0,0,sin(phase*PI)*ACTION_TRAVEL[index])
 
 func process_reload_sound_events(t: float):
 	var schedule: Array=W.reload_events(weapon,reload_empty)
@@ -301,28 +360,72 @@ func update_reload_presentation():
 	var t=clampf(1.-reload_left/reload_duration,0.,1.);process_reload_sound_events(t)
 	if viewmodel_is_authored(weapon):return
 	var rig=rig_for(weapon)
-	if rig.is_empty():return
+	if rig.is_empty() or reload_clip_name=="procedural_fallback":return
 	var anim=rig.get("reload_anim") as AnimationPlayer
 	if anim and not reload_clip_name.is_empty() and anim.has_animation(reload_clip_name):
 		anim.play(reload_clip_name,0.0);anim.seek(anim.get_animation(reload_clip_name).length*t,true);anim.pause()
-	update_real_magazine(rig,t);update_real_action(rig,t)
+	update_real_magazine_for(weapon,rig,t);update_real_action_for(weapon,rig,t)
 
 func complete_reload():
 	var count=mini(capacities[weapon]-ammo[weapon],reserve[weapon]);ammo[weapon]+=count;reserve[weapon]-=count
 	stop_reload_event_audio();reset_weapon_rig(weapon);reload_duration=0;reload_clip_name="";reload_event_cursor=0
 
-func update_spectator():
+func update_spectator_reload(ally,index: int):
+	var is_reloading=ally.reload_left>0
+	if is_reloading:
+		var t=clampf(1.-ally.reload_left/BOT_RELOAD_DURATION,0.,1.)
+		if index==0 and viewmodel_is_authored(index):
+			var anim=view_anims[index] as AnimationPlayer;var clip=W.viewmodel_clip("reload")
+			if anim and anim.has_animation(clip):
+				if not spectator_last_reload:anim.play(clip,0.0)
+				anim.seek(anim.get_animation(clip).length*t,true);anim.pause()
+		else:
+			var rig=rig_for(index);var clip=W.reload_clip(index,true);var anim=rig.get("reload_anim") as AnimationPlayer
+			if not spectator_last_reload:start_non_ak_reload_rig_for(index,true)
+			if anim and anim.has_animation(clip):anim.play(clip,0.0);anim.seek(anim.get_animation(clip).length*t,true);anim.pause()
+			update_real_magazine_for(index,rig,t);update_real_action_for(index,rig,t)
+	elif spectator_last_reload:
+		reset_weapon_rig(index)
+		if index==0 and viewmodel_is_authored(index):play_view_animation_for(index,"idle",false,1.)
+	spectator_last_reload=is_reloading
+
+func update_spectator(dt: float):
 	var allies=game.team_alive(team)
-	if allies.is_empty():return
-	var ally=allies[spectator_index%allies.size()];var eye=ally.global_position+Vector3.UP*1.62;camera.global_position=eye
-	if ally.visible_target or ally.memory>0:
-		var target=ally.last_known+Vector3.UP*1.05
-		if eye.distance_to(target)>.2:camera.look_at(target,Vector3.UP)
-	else:camera.global_basis=ally.global_basis
+	if allies.is_empty():clear_spectator_target();weapon_anchor.visible=false;return
+	var ally=allies[spectator_index%allies.size()]
+	if spectator_target!=ally:set_spectator_target(ally)
+	if not is_instance_valid(ally):return
+	if is_instance_valid(ally.model):ally.model.visible=false
+	if is_instance_valid(ally.gun):ally.gun.visible=false
+	var eye=ally.global_position+Vector3.UP*1.62
+	var aim_basis=ally.global_basis
+	if is_instance_valid(ally.gun):aim_basis=ally.gun.global_basis.orthonormalized()
+	camera.global_transform=Transform3D(aim_basis,eye);camera.fov=80
+	var index=int(ally.weapon)
+	if spectator_reload_weapon!=index:
+		if spectator_reload_weapon>=0:reset_weapon_rig(spectator_reload_weapon)
+		spectator_reload_weapon=index;spectator_last_reload=false;reset_weapon_rig(index)
+	for i in 4:models[i].visible=i==index
+	for key in utility_models:utility_models[key].visible=false
+	weapon_anchor.visible=true
+	if int(ally.shot_count)!=spectator_last_shot_count:
+		spectator_last_shot_count=int(ally.shot_count);flash_time=.045;kick_velocity+=Vector3(.38,0,1.15)
+		if index==0 and ally.reload_left<=0:play_view_animation_for(index,"fire",true,1.8)
+	update_spectator_reload(ally,index)
+	breathing+=dt;kick_velocity+=(-kick_position*190.-kick_velocity*23.)*dt;kick_position+=kick_velocity*dt
+	var speed=Vector2(ally.velocity.x,ally.velocity.z).length();var authored=viewmodel_is_authored(index)
+	var base=Vector3(0,-.119,0) if authored else (Vector3(.24,-.24,-.47) if index!=1 else Vector3(.20,-.16,-.45));var pose=Vector3.ZERO if authored else Vector3(.025,.07,-.015)
+	var bot_bob=float(ally.navigation_distance) if "navigation_distance" in ally else breathing
+	base+=Vector3(sin(bot_bob*3.5)*.004,absf(cos(bot_bob*3.5))*.006,kick_position.z)
+	pose+=Vector3(kick_position.x,kick_position.y,0)
+	if ally.reload_left>0 and not authored:
+		var rt=1.-ally.reload_left/BOT_RELOAD_DURATION;var working=smoothstep(.04,.18,rt)*(1.-smoothstep(.86,1.,rt));base+=Vector3(-.035,.018,.025)*working;pose.z-=working*.10
+	weapon_anchor.position=base;weapon_anchor.rotation=pose
+	flash_time=maxf(0,flash_time-dt);flash.light_energy=2.8 if ally.flash_clock>0 or flash_time>0 else 0.
 
 func _physics_process(dt):
 	if not game.active:return
-	if hp<=0:update_spectator();return
+	if hp<=0:update_spectator(dt);return
 	protection=maxf(0,protection-dt);shot_cooldown=maxf(0,shot_cooldown-dt);update_utility(dt)
 	if rescope_after_shot and shot_cooldown==0:scoped=true;rescope_after_shot=false
 	if reload_left>0:
@@ -409,8 +512,10 @@ func apply_non_ak_skeletal_motion(speed: float):
 		["left_wrist",Vector3(1,0,0),wrist_sway]
 	]
 	for entry in entries:
-		var key=str(entry[0]);var bone=int(rig.get(key+"_bone",-1));var rest=rig.get(key+"_rest_rotation")
-		if bone>=0 and rest is Quaternion:skeleton.set_bone_pose_rotation(bone,(rest as Quaternion)*Quaternion(entry[1],float(entry[2])))
+		var key=str(entry[0]);var bone=int(rig.get(key+"_bone",-1))
+		if bone>=0 and rig.has(key+"_rest_rotation"):
+			var rest_rotation: Quaternion=rig[key+"_rest_rotation"]
+			skeleton.set_bone_pose_rotation(bone,rest_rotation*Quaternion(entry[1],float(entry[2])))
 
 func update_view(dt: float,speed: float):
 	recoil=move_toward(recoil,0,dt*2.5);sway=sway.lerp(Vector2.ZERO,minf(1,dt*10));sway=sway.limit_length(.035);camera.rotation.x=pitch
@@ -427,6 +532,8 @@ func update_view(dt: float,speed: float):
 		base+=Vector3(sin(bob*.5)*.006,absf(cos(bob))*.009,0)*motion_blend;base+=Vector3(-sway.x,sway.y,recoil*.035);pose+=Vector3(recoil*.025,-sway.x,-sway.x*.5)
 		if reload_left>0:
 			var t=1.-reload_left/maxf(reload_duration,.001);var working=smoothstep(.04,.18,t)*(1.-smoothstep(.86,1.,t));base+=Vector3(-.035,.018,.025)*working;pose.z-=working*.10
+			if reload_clip_name=="procedural_fallback":
+				var fallback=smoothstep(.06,.28,t)*(1.-smoothstep(.72,.97,t));base+=Vector3(-.09,-.10,.08)*fallback;pose+=Vector3(-.28,.16,-.42)*fallback
 		else:apply_non_ak_skeletal_motion(speed)
 		update_shot_mechanism()
 	weapon_anchor.position=base;weapon_anchor.rotation=pose;flash_time=maxf(0,flash_time-dt);flash.light_energy=2.8 if flash_time>0 else 0.
@@ -436,4 +543,4 @@ func take_damage(amount: int,head=false,source=null):
 	if is_instance_valid(source) and source.team==team:return
 	var absorbed=mini(armor,roundi(amount*.35));armor-=absorbed;hp=maxi(0,hp-amount+absorbed);game.hurt_overlay=.55
 	if hp==0:
-		cancel_reload();utility_left=0;view_anim_lock=0;scoped=false;camera.fov=80;weapon_anchor.visible=false;velocity=Vector3.ZERO;collision_layer=0;collision_mask=0;game.actor_died(self,source,head)
+		cancel_reload();clear_spectator_target();utility_left=0;view_anim_lock=0;scoped=false;camera.fov=80;weapon_anchor.visible=false;velocity=Vector3.ZERO;collision_layer=0;collision_mask=0;game.actor_died(self,source,head)
