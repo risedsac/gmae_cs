@@ -68,6 +68,15 @@ func _find_animation_player(root: Node):
 			return found
 	return null
 
+func _find_skeleton(root: Node):
+	if root is Skeleton3D:
+		return root
+	for child in root.get_children():
+		var found=_find_skeleton(child)
+		if found:
+			return found
+	return null
+
 func _verify_weapon(spec: Dictionary) -> void:
 	var path:=str(spec.path)
 	if not _require_imported(path):
@@ -99,9 +108,16 @@ func _verify_reload_arms() -> void:
 		_fail("animated reload arms did not import as PackedScene")
 		return
 	var root=(resource as PackedScene).instantiate()
-	for node_name in ["ReloadArmsSkeleton","RightGripFrame","LeftPalmFrame"]:
+	for node_name in ["RightGripFrame","LeftPalmFrame","LeftSidearmMagazineAnchorFrame"]:
 		if not _find_exact(root,node_name):
 			_fail("animated reload arms missing node: "+node_name)
+	var skeleton=_find_skeleton(root) as Skeleton3D
+	if not skeleton:
+		_fail("animated reload arms missing actual Skeleton3D")
+	else:
+		for bone_name in ["L_arm_01","L_elbow_02","L_wrist_03"]:
+			if skeleton.find_bone(bone_name)<0:
+				_fail("animated reload arms Skeleton3D missing bone: "+bone_name)
 	var anim=_find_animation_player(root) as AnimationPlayer
 	if not anim:
 		_fail("animated reload arms missing AnimationPlayer")
@@ -131,7 +147,7 @@ func _run() -> void:
 		_verify_weapon(spec)
 	_verify_audio()
 	if failures.is_empty():
-		print("[DUSTLINE VERIFY] OK: sockets, reload clips and all four 16-sample firearm profiles are imported")
+		print("[DUSTLINE VERIFY] OK: weapon sockets, real reload Skeleton3D/clips and all four 16-sample firearm profiles are imported")
 		quit(0)
 	else:
 		push_error("[DUSTLINE VERIFY] FAILED with "+str(failures.size())+" error(s)")
