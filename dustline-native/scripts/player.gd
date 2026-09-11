@@ -1,12 +1,6 @@
 extends CharacterBody3D
 
 const W=preload("res://scripts/weapons.gd")
-const RELOAD_EVENT_TIMINGS=[
-	[{"t":.22,"name":"mag_out"},{"t":.58,"name":"mag_in"},{"t":.84,"name":"action"}],
-	[{"t":.20,"name":"mag_out"},{"t":.57,"name":"mag_in"},{"t":.82,"name":"action"}],
-	[{"t":.19,"name":"mag_out"},{"t":.56,"name":"mag_in"},{"t":.84,"name":"action"}],
-	[{"t":.18,"name":"mag_out"},{"t":.54,"name":"mag_in"},{"t":.77,"name":"action"}]
-]
 const ACTION_TRAVEL=[.075,.085,.070,.135]
 
 var game
@@ -134,19 +128,35 @@ func play_view_animation(state: String,lock_animation=true,speed_scale=1.0):
 func rig_for(index: int) -> Dictionary:
 	return rigs[index] if index>=0 and index<rigs.size() else {}
 
+func prepare_non_ak_rest_pose(index: int):
+	if index<=0:return
+	var rig=rig_for(index);var anim=rig.get("reload_anim") as AnimationPlayer;var skeleton=rig.get("reload_skeleton") as Skeleton3D
+	if not anim or not skeleton:return
+	var clip=W.reload_clip(index,false)
+	if not anim.has_animation(clip):return
+	anim.play(clip,0.0);anim.seek(0.0,true);anim.pause()
+	for key in ["left_shoulder","left_elbow","left_wrist"]:
+		var bone=int(rig.get(key+"_bone",-1))
+		if bone>=0:rig[key+"_rest_rotation"]=skeleton.get_bone_pose_rotation(bone)
+
 func reset_weapon_rig(index: int):
 	var rig=rig_for(index)
 	if rig.is_empty():return
-	var magazine=rig.get("magazine") as Node3D
-	var spare=rig.get("spare_magazine") as Node3D
-	var action=rig.get("action") as Node3D
+	var magazine=rig.get("magazine") as Node3D;var spare=rig.get("spare_magazine") as Node3D;var action=rig.get("action") as Node3D
 	if magazine and rig.has("magazine_rest"):magazine.transform=rig.magazine_rest;magazine.visible=true
 	if spare and rig.has("spare_rest"):spare.transform=rig.spare_rest;spare.visible=false
 	if action and rig.has("action_rest"):action.transform=rig.action_rest
-	var reload_mount=rig.get("reload_mount") as Node3D
-	if reload_mount:reload_mount.visible=false
-	var support_arm=rig.get("support_arm") as Node3D
-	if support_arm:support_arm.visible=true
+	var reload_mount=rig.get("reload_mount") as Node3D;var support_arm=rig.get("support_arm") as Node3D
+	if index>0:
+		# The authored skeletal forearm remains the normal support arm. This lets
+		# idle/move/draw/fire use real shoulder/elbow/wrist bones instead of moving
+		# a rigid SupportArm root; reload clips take over the same skeleton.
+		if reload_mount:reload_mount.visible=true
+		if support_arm:support_arm.visible=false
+		prepare_non_ak_rest_pose(index)
+	else:
+		if reload_mount:reload_mount.visible=false
+		if support_arm:support_arm.visible=true
 
 func stop_reload_event_audio():
 	for p in reload_event_players:
@@ -222,17 +232,14 @@ func start_non_ak_reload_rig():
 	var rig=rig_for(weapon)
 	if rig.is_empty() or not bool(rig.get("valid",false)):
 		push_error("[DUSTLINE RELOAD] explicit weapon rig unavailable for "+W.DATA[weapon].name);return
-	var anim=rig.get("reload_anim") as AnimationPlayer
-	var mount=rig.get("reload_mount") as Node3D
-	var support_arm=rig.get("support_arm") as Node3D
+	var anim=rig.get("reload_anim") as AnimationPlayer;var mount=rig.get("reload_mount") as Node3D;var support_arm=rig.get("support_arm") as Node3D
 	reload_clip_name=W.reload_clip(weapon,reload_empty)
 	if anim and not reload_clip_name.is_empty() and anim.has_animation(reload_clip_name):
 		if mount:mount.visible=true
 		if support_arm:support_arm.visible=false
 		anim.play(reload_clip_name,0.0);anim.seek(0.0,true);anim.pause()
 		print("[DUSTLINE RELOAD] ",W.DATA[weapon].name," clip=",reload_clip_name," mechanism=real")
-	else:
-		push_error("[DUSTLINE RELOAD] missing skeletal clip "+reload_clip_name+" for "+W.DATA[weapon].name)
+	else:push_error("[DUSTLINE RELOAD] missing skeletal clip "+reload_clip_name+" for "+W.DATA[weapon].name)
 
 func request_reload():
 	if utility_left>0 or reload_left>0 or ammo[weapon]==capacities[weapon] or reserve[weapon]<=0:return
@@ -242,18 +249,14 @@ func request_reload():
 	if viewmodel_is_authored(weapon):play_view_animation("reload",true,1.)
 	else:start_non_ak_reload_rig()
 
-func transform_between(node: Node3D,ancestor: Node3D) -> Transform3D:
-	return ancestor.global_transform.affine_inverse()*node.global_transform
+func transform_between(node: Node3D,ancestor: Node3D) -> Transform3D:return ancestor.global_transform.affine_inverse()*node.global_transform
 
 func set_node_from_root_transform(node: Node3D,root: Node3D,target: Transform3D):
 	var parent=node.get_parent() as Node3D
-	if parent:
-		node.transform=(root.global_transform.affine_inverse()*parent.global_transform).affine_inverse()*target
+	if parent:node.transform=(root.global_transform.affine_inverse()*parent.global_transform).affine_inverse()*target
 
 func align_mechanism_grip_to_hand(node: Node3D,grip_marker: Node3D,hand_marker: Node3D,root: Node3D):
-	# Capture the socket relative to the mechanism before moving the mechanism.
-	var grip_in_node=node.global_transform.affine_inverse()*grip_marker.global_transform
-	var target_in_root=root.global_transform.affine_inverse()*hand_marker.global_transform
+	var grip_in_node=node.global_transform.affine_inverse()*grip_marker.global_transform;var target_in_root=root.global_transform.affine_inverse()*hand_marker.global_transform
 	set_node_from_root_transform(node,root,target_in_root*grip_in_node.affine_inverse())
 
 func reload_hand_marker(rig: Dictionary) -> Node3D:
@@ -261,16 +264,10 @@ func reload_hand_marker(rig: Dictionary) -> Node3D:
 	return rig.get("reload_left_palm") as Node3D
 
 func update_real_magazine(rig: Dictionary,t: float):
-	var magazine=rig.get("magazine") as Node3D
-	var spare=rig.get("spare_magazine") as Node3D
-	var grip=rig.get("magazine_grip") as Node3D
-	var hand=reload_hand_marker(rig)
+	var magazine=rig.get("magazine") as Node3D;var spare=rig.get("spare_magazine") as Node3D;var grip=rig.get("magazine_grip") as Node3D;var hand=reload_hand_marker(rig)
 	if not magazine or not grip or not hand:return
-	# Four explicit ownership phases: weapon -> hand(old) -> hand(new) -> weapon.
-	if t<.18:
-		magazine.visible=true
-	elif t<.43:
-		magazine.visible=true;align_mechanism_grip_to_hand(magazine,grip,hand,models[weapon])
+	if t<.18:magazine.visible=true
+	elif t<.43:magazine.visible=true;align_mechanism_grip_to_hand(magazine,grip,hand,models[weapon])
 	elif t<.49:
 		magazine.visible=false
 		if spare:spare.visible=false
@@ -278,10 +275,7 @@ func update_real_magazine(rig: Dictionary,t: float):
 		magazine.visible=false
 		if spare:
 			spare.visible=true
-			# Spare exports share the same magazine geometry frame. Reuse the
-			# installed socket offset rather than searching a fuzzy child name.
-			var grip_in_mag=magazine.global_transform.affine_inverse()*grip.global_transform
-			var target_in_root=models[weapon].global_transform.affine_inverse()*hand.global_transform
+			var grip_in_mag=magazine.global_transform.affine_inverse()*grip.global_transform;var target_in_root=models[weapon].global_transform.affine_inverse()*hand.global_transform
 			set_node_from_root_transform(spare,models[weapon],target_in_root*grip_in_mag.affine_inverse())
 	else:
 		magazine.transform=rig.magazine_rest;magazine.visible=true
@@ -293,12 +287,11 @@ func update_real_action(rig: Dictionary,t: float):
 	action.transform=rig.action_rest
 	var start=.76 if weapon==3 else .80;var end=.94
 	if t>=start and t<=end:
-		var phase=clampf((t-start)/maxf(end-start,.001),0.,1.)
-		action.position+=Vector3(0,0,sin(phase*PI)*ACTION_TRAVEL[weapon])
+		var phase=clampf((t-start)/maxf(end-start,.001),0.,1.);action.position+=Vector3(0,0,sin(phase*PI)*ACTION_TRAVEL[weapon])
 
 func process_reload_sound_events(t: float):
-	var schedule: Array=RELOAD_EVENT_TIMINGS[weapon]
-	while reload_event_cursor<schedule.size() and t>=float(schedule[reload_event_cursor].t):
+	var schedule: Array=W.reload_events(weapon,reload_empty)
+	while reload_event_cursor<schedule.size() and t>=float(schedule[reload_event_cursor].f):
 		var p=game.sound.reload_event(weapon,str(schedule[reload_event_cursor].name),-12.)
 		if is_instance_valid(p):reload_event_players.append(p)
 		reload_event_cursor+=1
@@ -396,18 +389,33 @@ func update_shot_mechanism():
 	if not action or not rig.has("action_rest"):return
 	action.transform=rig.action_rest
 	if weapon==1 and shot_cooldown>0:
-		var cycle=1.-shot_cooldown/maxf(W.DATA[1].interval,.001);var pulse=sin(clampf(cycle/.72,0.,1.)*PI)
-		action.position+=Vector3(0,0,pulse*.045)
+		var cycle=1.-shot_cooldown/maxf(W.DATA[1].interval,.001);var pulse=sin(clampf(cycle/.72,0.,1.)*PI);action.position+=Vector3(0,0,pulse*.045)
 	elif weapon==3 and shot_cooldown>0:
-		var cycle=1.-shot_cooldown/maxf(W.DATA[3].interval,.001);var pull=sin(clampf((cycle-.14)/.62,0.,1.)*PI)
-		action.position+=Vector3(0,0,pull*ACTION_TRAVEL[3])
+		var cycle=1.-shot_cooldown/maxf(W.DATA[3].interval,.001);var pull=sin(clampf((cycle-.14)/.62,0.,1.)*PI);action.position+=Vector3(0,0,pull*ACTION_TRAVEL[3])
+
+func apply_non_ak_skeletal_motion(speed: float):
+	if weapon<=0 or reload_left>0:return
+	var rig=rig_for(weapon);var skeleton=rig.get("reload_skeleton") as Skeleton3D
+	if not skeleton:return
+	var move=minf(speed/3.2,1.);var cycle=bob;var draw=clampf(draw_left/.28,0.,1.)
+	var fire_phase=0.
+	if shot_cooldown>0:fire_phase=sin(clampf(1.-shot_cooldown/maxf(W.DATA[weapon].interval,.001),0.,1.)*PI)
+	var shoulder_sway=sin(breathing*1.7)*.006+sin(cycle*.5)*.018*move-draw*.10-fire_phase*.018
+	var elbow_sway=cos(cycle)*.026*move+draw*.14+fire_phase*.028
+	var wrist_sway=sin(cycle+.8)*.018*move-draw*.08-fire_phase*.045
+	var entries=[
+		["left_shoulder",Vector3(0,0,1),shoulder_sway],
+		["left_elbow",Vector3(1,0,0),elbow_sway],
+		["left_wrist",Vector3(1,0,0),wrist_sway]
+	]
+	for entry in entries:
+		var key=str(entry[0]);var bone=int(rig.get(key+"_bone",-1));var rest=rig.get(key+"_rest_rotation")
+		if bone>=0 and rest is Quaternion:skeleton.set_bone_pose_rotation(bone,(rest as Quaternion)*Quaternion(entry[1],float(entry[2])))
 
 func update_view(dt: float,speed: float):
 	recoil=move_toward(recoil,0,dt*2.5);sway=sway.lerp(Vector2.ZERO,minf(1,dt*10));sway=sway.limit_length(.035);camera.rotation.x=pitch
 	camera.fov=25 if scoped and weapon==3 else 80;weapon_anchor.visible=hp>0 and not (scoped and weapon==3)
-	var authored=viewmodel_is_authored(weapon)
-	var base=Vector3(0,-.119,0) if authored else (Vector3(.24,-.24,-.47) if weapon!=1 else Vector3(.20,-.16,-.45))
-	var pose=Vector3.ZERO if authored else Vector3(.025,.07,-.015)
+	var authored=viewmodel_is_authored(weapon);var base=Vector3(0,-.119,0) if authored else (Vector3(.24,-.24,-.47) if weapon!=1 else Vector3(.20,-.16,-.45));var pose=Vector3.ZERO if authored else Vector3(.025,.07,-.015)
 	breathing+=dt;motion_blend=lerpf(motion_blend,minf(speed/3.,1.),1-exp(-dt*9));kick_velocity+=(-kick_position*190.-kick_velocity*23.)*dt;kick_position+=kick_velocity*dt
 	if authored:
 		view_anim_lock=maxf(0,view_anim_lock-dt);base+=Vector3(-sway.x*.28,sway.y*.24,kick_position.z*.35+recoil*.010);pose+=Vector3(kick_position.x*.35,kick_position.y*.35,-sway.x*.16)
@@ -419,6 +427,7 @@ func update_view(dt: float,speed: float):
 		base+=Vector3(sin(bob*.5)*.006,absf(cos(bob))*.009,0)*motion_blend;base+=Vector3(-sway.x,sway.y,recoil*.035);pose+=Vector3(recoil*.025,-sway.x,-sway.x*.5)
 		if reload_left>0:
 			var t=1.-reload_left/maxf(reload_duration,.001);var working=smoothstep(.04,.18,t)*(1.-smoothstep(.86,1.,t));base+=Vector3(-.035,.018,.025)*working;pose.z-=working*.10
+		else:apply_non_ak_skeletal_motion(speed)
 		update_shot_mechanism()
 	weapon_anchor.position=base;weapon_anchor.rotation=pose;flash_time=maxf(0,flash_time-dt);flash.light_energy=2.8 if flash_time>0 else 0.
 
