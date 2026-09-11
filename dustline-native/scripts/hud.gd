@@ -4,6 +4,18 @@ var game
 var menu: Control
 var shop: Control
 var shop_status: Label
+var shop_feedback: Label
+var shop_detail_name: Label
+var shop_detail_meta: Label
+var shop_detail_state: Label
+var shop_buy_button: Button
+var shop_item_buttons={}
+var shop_selected="ak"
+var preview_viewport: SubViewport
+var preview_model_root: Node3D
+var preview_camera: Camera3D
+const SHOP_ORDER=["ak","m4","awp","he","smoke","armor","kit"]
+const SHOP_SHORTCUTS={KEY_1:"ak",KEY_2:"m4",KEY_3:"awp",KEY_4:"he",KEY_5:"smoke",KEY_6:"armor",KEY_7:"kit"}
 const W=preload("res://scripts/weapons.gd")
 var title: Label
 var subtitle: Label
@@ -19,6 +31,9 @@ func _ready():
 
 func label_at(parent: Node,text_: String,pos: Vector2,size_: int,color=Color(.93,.92,.86)) -> Label:
 	var label=Label.new();label.text=text_;label.position=pos;label.add_theme_font_size_override("font_size",size_);label.add_theme_color_override("font_color",color);parent.add_child(label);return label
+
+func styled_label(text_: String,size_: int,color=Color(.93,.92,.86)) -> Label:
+	var label=Label.new();label.text=text_;label.add_theme_font_size_override("font_size",size_);label.add_theme_color_override("font_color",color);return label
 
 func build_menu():
 	menu=Control.new();menu.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(menu)
@@ -41,60 +56,110 @@ func build_menu():
 	label_at(panel,"5v5   /   A & B   /   先赢 5 回合",Vector2(0,604),16,gold);label_at(panel,"离线爆破   ·   沙漠双点",Vector2(850,604),14,Color(.49,.56,.57))
 
 func button(parent: Node,text_: String,pos: Vector2,size_: Vector2) -> Button:
-	var b=Button.new();b.text=text_;b.position=pos;b.size=size_;b.add_theme_font_size_override("font_size",21)
-	var style=StyleBoxFlat.new();style.bg_color=Color(.19,.23,.24);style.border_color=Color(.48,.48,.37);style.set_border_width_all(1);style.content_margin_left=20;style.content_margin_right=20;b.add_theme_stylebox_override("normal",style)
-	var hover=style.duplicate();hover.bg_color=Color(.29,.32,.29);hover.border_color=gold;b.add_theme_stylebox_override("hover",hover);parent.add_child(b);return b
+	var b=Button.new();b.text=text_;b.position=pos;b.size=size_;b.add_theme_font_size_override("font_size",21);apply_button_style(b);parent.add_child(b);return b
+
+func apply_button_style(b: Button):
+	var style=StyleBoxFlat.new();style.bg_color=Color(.19,.23,.24);style.border_color=Color(.48,.48,.37);style.set_border_width_all(1);style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=10;style.content_margin_bottom=10;b.add_theme_stylebox_override("normal",style)
+	var hover=style.duplicate();hover.bg_color=Color(.29,.32,.29);hover.border_color=gold;b.add_theme_stylebox_override("hover",hover)
+	var focus=hover.duplicate();focus.border_color=Color(1,.82,.42);focus.set_border_width_all(2);b.add_theme_stylebox_override("focus",focus)
+	var disabled=style.duplicate();disabled.bg_color=Color(.09,.11,.12);disabled.border_color=Color(.22,.24,.24);b.add_theme_stylebox_override("disabled",disabled);b.add_theme_color_override("font_disabled_color",Color(.48,.51,.50))
 
 func show_menu():
 	menu.visible=true;resume_button.visible=game.started and not game.finished;begin_button.text="重新开始   →" if game.started else "开始比赛   →";title.text="比赛结束" if game.finished else ("已暂停" if game.started else "沙漠行动")
 	subtitle.text=("%d 次击杀  /  %d 次阵亡"%[game.kills,game.deaths]) if game.finished else "沙漠双点  ·  5v5 爆破"
 
 func _process(_dt):
-	if shop.visible:shop_status.text="$%d    /    购买剩余 %.0f 秒"%[game.player.money,game.buy_left]
+	if shop.visible:refresh_shop()
 	queue_redraw()
+
+func make_shop_preview(parent: Control):
+	var frame=Panel.new();frame.custom_minimum_size=Vector2(520,315);frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;frame.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	var fs=StyleBoxFlat.new();fs.bg_color=Color(.045,.06,.067,.96);fs.border_color=Color(.20,.27,.27);fs.set_border_width_all(1);frame.add_theme_stylebox_override("panel",fs);parent.add_child(frame)
+	var container=SubViewportContainer.new();container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);container.offset_left=8;container.offset_top=8;container.offset_right=-8;container.offset_bottom=-8;container.stretch=true;container.mouse_filter=Control.MOUSE_FILTER_IGNORE;frame.add_child(container)
+	preview_viewport=SubViewport.new();preview_viewport.size=Vector2i(720,420);preview_viewport.transparent_bg=true;preview_viewport.own_world_3d=true;preview_viewport.render_target_update_mode=SubViewport.UPDATE_DISABLED;preview_viewport.msaa_3d=Viewport.MSAA_2X;container.add_child(preview_viewport)
+	var env=WorldEnvironment.new();var e=Environment.new();e.background_mode=Environment.BG_COLOR;e.background_color=Color(0,0,0,0);e.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;e.ambient_light_color=Color(.78,.84,.88);e.ambient_light_energy=1.2;e.tonemap_mode=Environment.TONE_MAPPER_FILMIC;env.environment=e;preview_viewport.add_child(env)
+	var key=DirectionalLight3D.new();key.rotation_degrees=Vector3(-38,-28,0);key.light_energy=2.;key.light_color=Color(1,.90,.78);preview_viewport.add_child(key)
+	var fill=DirectionalLight3D.new();fill.rotation_degrees=Vector3(22,150,0);fill.light_energy=.8;fill.light_color=Color(.55,.72,1);preview_viewport.add_child(fill)
+	preview_model_root=Node3D.new();preview_viewport.add_child(preview_model_root)
+	preview_camera=Camera3D.new();preview_camera.projection=Camera3D.PROJECTION_ORTHOGONAL;preview_camera.position=Vector3(0,.02,2.2);preview_viewport.add_child(preview_camera);preview_camera.current=true
+
+func shop_product_button(parent: Node,item: String,shortcut: int) -> Button:
+	var b=Button.new();b.alignment=HORIZONTAL_ALIGNMENT_LEFT;b.custom_minimum_size=Vector2(350,50);b.size_flags_horizontal=Control.SIZE_EXPAND_FILL;b.focus_mode=Control.FOCUS_ALL;b.add_theme_font_size_override("font_size",18);apply_button_style(b);parent.add_child(b)
+	b.pressed.connect(func():select_shop_item(item));b.set_meta("shortcut",shortcut);shop_item_buttons[item]=b;return b
+
+func build_shop():
+	shop=Control.new();shop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);shop.mouse_filter=Control.MOUSE_FILTER_STOP;add_child(shop);shop.visible=false
+	var shade=ColorRect.new();shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);shade.color=Color(.025,.04,.055,.97);shop.add_child(shade)
+	var margin=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);margin.add_theme_constant_override("margin_left",54);margin.add_theme_constant_override("margin_right",54);margin.add_theme_constant_override("margin_top",38);margin.add_theme_constant_override("margin_bottom",38);shop.add_child(margin)
+	var root=VBoxContainer.new();root.add_theme_constant_override("separation",14);margin.add_child(root)
+	var top=HBoxContainer.new();root.add_child(top);top.add_child(styled_label("装备购买",36,gold));var spacer=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(spacer);shop_status=styled_label("",21,ink);top.add_child(shop_status)
+	shop_feedback=styled_label("选择商品查看详情",17,Color(.68,.74,.73));shop_feedback.custom_minimum_size.y=28;root.add_child(shop_feedback)
+	var line=HSeparator.new();root.add_child(line)
+	var main=HBoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",28);root.add_child(main)
+	var left=VBoxContainer.new();left.custom_minimum_size.x=390;left.add_theme_constant_override("separation",7);main.add_child(left)
+	var categories={"主武器":[],"投掷物":[],"装备":[]}
+	for item in SHOP_ORDER:categories[str(game.BUY_CATALOG[item].category)].append(item)
+	var shortcut=1
+	for category in ["主武器","投掷物","装备"]:
+		var heading=styled_label(category,18,gold);heading.custom_minimum_size.y=30;left.add_child(heading)
+		for item in categories[category]:shop_product_button(left,item,shortcut);shortcut+=1
+	var right=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.size_flags_vertical=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",10);main.add_child(right)
+	shop_detail_name=styled_label("",30,gold);right.add_child(shop_detail_name);shop_detail_meta=styled_label("",17,Color(.72,.77,.76));right.add_child(shop_detail_meta);shop_detail_state=styled_label("",18,ink);right.add_child(shop_detail_state)
+	make_shop_preview(right)
+	shop_buy_button=Button.new();shop_buy_button.custom_minimum_size.y=54;shop_buy_button.add_theme_font_size_override("font_size",20);apply_button_style(shop_buy_button);shop_buy_button.pressed.connect(func():game.buy(shop_selected));right.add_child(shop_buy_button)
+	var bottom=HBoxContainer.new();root.add_child(bottom);var hint=styled_label("1–7 快捷购买 · ↑↓/Tab 切换商品 · Enter 查看/购买 · B 返回战场",15,Color(.66,.72,.71));hint.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bottom.add_child(hint)
+	var close=Button.new();close.text="返回战场  [ B ]";close.custom_minimum_size=Vector2(245,45);apply_button_style(close);close.pressed.connect(func():game.toggle_buy());bottom.add_child(close)
+	shop.visibility_changed.connect(func():
+		if shop.visible:on_shop_opened()
+		elif preview_viewport:preview_viewport.render_target_update_mode=SubViewport.UPDATE_DISABLED)
+
+func on_shop_opened():
+	set_shop_feedback("选择商品；不可购买的原因会直接显示在商店内",true);select_shop_item(shop_selected);refresh_shop()
+	var first=shop_item_buttons.get(shop_selected)
+	if is_instance_valid(first):first.grab_focus()
+
+func set_shop_feedback(text_: String,success: bool):
+	if not is_instance_valid(shop_feedback):return
+	shop_feedback.text=text_;shop_feedback.add_theme_color_override("font_color",Color(.55,.88,.62) if success else Color(1.,.48,.35))
+
+func select_shop_item(item: String):
+	if not game.BUY_CATALOG.has(item):return
+	shop_selected=item;update_shop_preview(item);refresh_shop()
+
+func clear_preview():
+	if not is_instance_valid(preview_model_root):return
+	for child in preview_model_root.get_children():child.queue_free()
+
+func update_shop_preview(item: String):
+	clear_preview()
+	if not is_instance_valid(preview_viewport):return
+	var model: Node3D=null;var ortho=1.4
+	if item in ["ak","m4","awp"]:
+		var indices={"ak":0,"m4":2,"awp":3};model=W.make(indices[item]);ortho=1.8 if item=="awp" else 1.55
+	elif item in ["he","smoke"]:
+		model=W.make_utility(item);ortho=.30
+	if model:
+		preview_model_root.add_child(model);model.rotation=Vector3(-.12,-1.02,.04);model.position=Vector3(0,-.03,0)
+	preview_camera.size=ortho;preview_viewport.render_target_update_mode=SubViewport.UPDATE_ONCE
+
+func refresh_shop():
+	if not is_instance_valid(shop_status) or not game.started:return
+	shop_status.text="$%d    ·    购买剩余 %.0f 秒"%[game.player.money,maxf(0,game.buy_left)]
+	for i in SHOP_ORDER.size():
+		var item=SHOP_ORDER[i];var info: Dictionary=game.BUY_CATALOG[item];var state=game.buy_state(item);var b=shop_item_buttons.get(item) as Button
+		if b:b.text="[%d]  %-10s   $%d    %s"%[i+1,str(info.name),int(info.price),str(state.status)]
+	var selected_info: Dictionary=game.BUY_CATALOG[shop_selected];var selected_state=game.buy_state(shop_selected)
+	shop_detail_name.text=str(selected_info.name);shop_detail_meta.text="%s   ·   $%d"%[str(selected_info.category),int(selected_info.price)]
+	shop_detail_state.text="状态："+str(selected_state.status);shop_detail_state.add_theme_color_override("font_color",Color(.55,.88,.62) if bool(selected_state.enabled) else Color(1.,.55,.38))
+	shop_buy_button.disabled=not bool(selected_state.enabled);shop_buy_button.text=("购买 %s  ·  $%d"%[str(selected_info.name),int(selected_info.price)]) if bool(selected_state.enabled) else str(selected_state.status)
+
+func _unhandled_input(event):
+	if not shop.visible or not event is InputEventKey or not event.pressed or event.echo:return
+	if SHOP_SHORTCUTS.has(event.physical_keycode):
+		var item=str(SHOP_SHORTCUTS[event.physical_keycode]);select_shop_item(item);game.buy(item);get_viewport().set_input_as_handled()
 
 func text_at(text_: String,pos: Vector2,size_: int,color: Color):
 	draw_string(font,pos+Vector2(1,2),text_,HORIZONTAL_ALIGNMENT_LEFT,-1,size_,Color(0,0,0,.65));draw_string(font,pos,text_,HORIZONTAL_ALIGNMENT_LEFT,-1,size_,color)
-
-func add_preview(parent: Control,model: Node3D,pos: Vector2,size_: Vector2,ortho_size: float,rotation_: Vector3):
-	var frame=Panel.new();frame.position=pos;frame.size=size_;frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var frame_style=StyleBoxFlat.new();frame_style.bg_color=Color(.055,.07,.075,.92);frame_style.border_color=Color(.21,.27,.27);frame_style.set_border_width_all(1);frame.add_theme_stylebox_override("panel",frame_style);parent.add_child(frame)
-	var container=SubViewportContainer.new();container.position=Vector2(4,4);container.size=size_-Vector2(8,8);container.stretch=true;container.mouse_filter=Control.MOUSE_FILTER_IGNORE;frame.add_child(container)
-	var viewport=SubViewport.new();viewport.size=Vector2i(420,180);viewport.transparent_bg=true;viewport.own_world_3d=true;viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;viewport.msaa_3d=Viewport.MSAA_2X;container.add_child(viewport)
-	var env=WorldEnvironment.new();var e=Environment.new();e.background_mode=Environment.BG_COLOR;e.background_color=Color(0,0,0,0);e.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;e.ambient_light_color=Color(.78,.84,.88);e.ambient_light_energy=1.25;e.tonemap_mode=Environment.TONE_MAPPER_FILMIC;env.environment=e;viewport.add_child(env)
-	var key=DirectionalLight3D.new();key.rotation_degrees=Vector3(-38,-28,0);key.light_energy=2.1;key.light_color=Color(1,.90,.78);viewport.add_child(key)
-	var fill=DirectionalLight3D.new();fill.rotation_degrees=Vector3(22,150,0);fill.light_energy=.85;fill.light_color=Color(.55,.72,1);viewport.add_child(fill)
-	viewport.add_child(model);model.rotation=rotation_
-	for node in model.find_children("*","Node3D",true,false):
-		if node.name.begins_with("MainArm") or node.name.begins_with("SupportArm"):node.visible=false
-	var camera=Camera3D.new();camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.size=ortho_size;camera.position=Vector3(0,.02,2.2);viewport.add_child(camera);camera.current=true
-
-func add_weapon_preview(parent: Control,index: int,pos: Vector2):
-	var model=W.make(index);var ortho=.72 if index==1 else (1.75 if index==3 else 1.55);model.position=Vector3(0,-.03,0)
-	add_preview(parent,model,pos,Vector2(350,142),ortho,Vector3(-.12,-1.02,.04))
-
-func add_utility_preview(parent: Control,kind: String,pos: Vector2):
-	var model=W.make_utility(kind);model.position=Vector3.ZERO
-	add_preview(parent,model,pos,Vector2(118,72),.27,Vector3(-.25,-.7,.12))
-
-func build_shop():
-	shop=Control.new();shop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(shop);shop.visible=false
-	var shade=ColorRect.new();shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);shade.color=Color(.025,.04,.055,.97);shop.add_child(shade)
-	var panel=Control.new();panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER);panel.position=Vector2(-580,-330);shop.add_child(panel)
-	label_at(panel,"装备购买",Vector2(0,0),40,gold);shop_status=label_at(panel,"",Vector2(600,12),24);label_at(panel,"武器卡片显示当前实际加载的游戏模型",Vector2(0,65),17,Color(.65,.72,.73))
-	var cards=[["ak","AK-47",2700,"7.62 / 30 发","高伤害 · 中速"],["m4","M4A1",3100,"5.56 / 30 发","低后坐 · 高射速"],["awp","AWP",4750,".338 / 5 发","高伤害 · 开镜"]]
-	var model_indices=[0,2,3]
-	for i in 3:
-		var c=cards[i];var x=i*390;add_weapon_preview(panel,model_indices[i],Vector2(x,105));label_at(panel,c[1],Vector2(x+10,254),29,gold);label_at(panel,c[3],Vector2(x+10,296),17);label_at(panel,c[4],Vector2(x+185,296),16,Color(.65,.72,.73))
-		var buy_button=button(panel,"购买  $%d"%c[2],Vector2(x,329),Vector2(350,52));buy_button.pressed.connect(func():game.buy(c[0]))
-	add_utility_preview(panel,"he",Vector2(0,416));add_utility_preview(panel,"smoke",Vector2(292,416))
-	var items=[["he","手雷","$300","G"],["smoke","烟雾弹","$300","H"],["armor","◈  护甲","$650","100 AP"],["kit","⌁  拆弹器","$400","5 秒拆弹"]]
-	for i in 4:
-		var item=items[i];var x=i*293
-		if i>=2:
-			var icon_panel=Panel.new();icon_panel.position=Vector2(x,416);icon_panel.size=Vector2(118,72);var s=StyleBoxFlat.new();s.bg_color=Color(.055,.07,.075,.92);s.border_color=Color(.21,.27,.27);s.set_border_width_all(1);icon_panel.add_theme_stylebox_override("panel",s);panel.add_child(icon_panel);label_at(icon_panel,"◈" if i==2 else "⌁",Vector2(38,8),39,gold)
-		label_at(panel,item[1],Vector2(x+128,417),18,gold);label_at(panel,item[3],Vector2(x+128,444),14,Color(.65,.72,.73));var b=button(panel,"购买 "+item[2],Vector2(x,493),Vector2(268,48));b.pressed.connect(func():game.buy(item[0]))
-	label_at(panel,"G / H 会先拿出投掷物再投掷  ·  CT 拆弹器缩短至 5 秒",Vector2(0,562),16,Color(.72,.76,.74));var close=button(panel,"返回战场  [ B ]",Vector2(820,590),Vector2(310,48));close.pressed.connect(func():game.toggle_buy())
 
 func _draw():
 	if not game.started:return
