@@ -16,6 +16,9 @@ var capsule: CollisionShape3D
 var view: SubViewport
 var weapon_anchor: Node3D
 var models: Array[Node3D]=[]
+var view_anims: Array=[]
+var view_anim_lock=0.
+var view_anim_state=""
 var magazines: Array=[]
 var hands: Array=[]
 var bolts: Array=[]
@@ -80,10 +83,22 @@ func build_viewmodel():
 	var light=DirectionalLight3D.new();light.rotation_degrees=Vector3(-35,-30,0);light.light_energy=1.7;light.light_color=Color(1,.9,.77);view.add_child(light)
 	weapon_anchor=Node3D.new();view.add_child(weapon_anchor)
 	for index in 4:
-		var model=W.make(index);weapon_anchor.add_child(model);model.scale=Vector3.ONE*.78;models.append(model)
-		var magazine=find_part(model,"Magazine");var hand=find_part(model,"SupportArm");var bolt=find_part(model,"Bolt")
-		magazines.append(magazine);hands.append(hand);bolts.append(bolt)
-		magazine_base.append(magazine.position if magazine else Vector3.ZERO);hand_base.append(hand.position if hand else Vector3.ZERO);bolt_base.append(bolt.position if bolt else Vector3.ZERO)
+		var model=W.make_player_viewmodel(index);weapon_anchor.add_child(model)
+		var authored=bool(model.get_meta("authored_viewmodel",false))
+		if not authored:model.scale=Vector3.ONE*.78
+		models.append(model)
+		var anim=find_animation_player(model);view_anims.append(anim)
+		if authored and anim:
+			for state in ["idle","walk","run"]:
+				var clip=W.viewmodel_clip(state)
+				if anim.has_animation(clip):anim.get_animation(clip).loop_mode=Animation.LOOP_LINEAR
+		if authored:
+			magazines.append(null);hands.append(null);bolts.append(null)
+			magazine_base.append(Vector3.ZERO);hand_base.append(Vector3.ZERO);bolt_base.append(Vector3.ZERO)
+		else:
+			var magazine=find_part(model,"Magazine");var hand=find_part(model,"SupportArm");var bolt=find_part(model,"Bolt")
+			magazines.append(magazine);hands.append(hand);bolts.append(bolt)
+			magazine_base.append(magazine.position if magazine else Vector3.ZERO);hand_base.append(hand.position if hand else Vector3.ZERO);bolt_base.append(bolt.position if bolt else Vector3.ZERO)
 		for part in model.find_children("*","MeshInstance3D",true,false):part.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for kind in ["he","smoke"]:
 		var utility=W.make_utility(kind);weapon_anchor.add_child(utility);utility_models[kind]=utility;utility.visible=false
@@ -92,18 +107,44 @@ func build_viewmodel():
 	for i in 4:models[i].visible=i==weapon
 	flash=OmniLight3D.new();flash.light_color=Color(1,.65,.18);flash.light_energy=0;flash.omni_range=2;weapon_anchor.add_child(flash);flash.position=Vector3(0,0,-1.3)
 
+func find_animation_player(node: Node):
+	if node is AnimationPlayer:return node
+	for child in node.get_children():
+		var found=find_animation_player(child)
+		if found:return found
+	return null
+
 func find_part(node: Node,prefix: String):
 	for child in node.find_children("*","Node3D",true,false):
 		if child.name.begins_with(prefix):return child
 	return null
 
+func viewmodel_is_authored(index: int) -> bool:
+	return index>=0 and index<models.size() and bool(models[index].get_meta("authored_viewmodel",false))
+
+func animation_length(index: int,state: String,fallback: float) -> float:
+	if index<0 or index>=view_anims.size():return fallback
+	var anim=view_anims[index]
+	var clip=W.viewmodel_clip(state)
+	if anim and not clip.is_empty() and anim.has_animation(clip):return anim.get_animation(clip).length
+	return fallback
+
+func play_view_animation(state: String,lock_animation=true,speed_scale=1.0):
+	if not viewmodel_is_authored(weapon) or weapon>=view_anims.size():return
+	var anim=view_anims[weapon]
+	var clip=W.viewmodel_clip(state)
+	if not anim or clip.is_empty() or not anim.has_animation(clip):return
+	if anim.current_animation!=clip or state in ["draw","reload","fire"]:anim.play(clip,.045,speed_scale)
+	view_anim_state=state
+	if lock_animation:view_anim_lock=maxf(view_anim_lock,anim.get_animation(clip).length/maxf(absf(speed_scale),.01))
+
 func reset_at(pos: Vector3):
-	global_position=pos+Vector3.UP*.08;velocity=Vector3.ZERO;rotation.y=0;pitch=0;scoped=false;rescope_after_shot=false
+	global_position=pos+Vector3.UP*.08;velocity=Vector3.ZERO;rotation.y=0;pitch=0;scoped=false;rescope_after_shot=false;spectator_index=0
 	if hp<=0:armor=0
 	hp=100;ammo=[30,12,30,5];reserve=[90,48,90,25];protection=0;dead_left=0
 	collision_layer=2;collision_mask=1|4;camera.position=Vector3(0,1.63,0);camera.rotation=Vector3.ZERO
 	reload_left=0;recoil=0;kick_position=Vector3.ZERO;kick_velocity=Vector3.ZERO;draw_left=0;flash_time=0;shot_cooldown=0;shot_queued=false;reload_queued=false
-	utility_left=0;utility_kind="";utility_thrown=false
+	view_anim_lock=0;view_anim_state="";utility_left=0;utility_kind="";utility_thrown=false
 	for kind in utility_models:utility_models[kind].visible=false
 	weapon=primary if primary>=0 else 1
 	for i in 4:models[i].visible=i==weapon
@@ -127,7 +168,7 @@ func _unhandled_input(event):
 
 func begin_utility(kind: String):
 	if utility_left>0 or reload_left>0 or hp<=0 or grenades.get(kind,0)<=0 or game.phase not in ["live","planted"]:return
-	utility_kind=kind;utility_left=.52;utility_thrown=false;scoped=false;shot_queued=false;reload_queued=false
+	utility_kind=kind;utility_left=.52;utility_thrown=false;scoped=false;shot_queued=false;reload_queued=false;view_anim_lock=0
 	for model in models:model.visible=false
 	for key in utility_models:utility_models[key].visible=key==kind
 	game.sound.local("equip",-18)
@@ -142,7 +183,7 @@ func update_utility(dt: float):
 	if utility_left<=0:
 		for key in utility_models:utility_models[key].visible=false
 		for i in 4:models[i].visible=i==weapon
-		utility_kind="";utility_thrown=false
+		utility_kind="";utility_thrown=false;view_anim_state=""
 
 func equip_primary(index: int):
 	for i in [0,2,3]:owned[i]=i==index
@@ -151,22 +192,40 @@ func equip_primary(index: int):
 func switch_weapon(index: int):
 	if not owned[index] or index==weapon or utility_left>0:return
 	if is_instance_valid(reload_audio):reload_audio.stop()
-	reload_left=0;reload_queued=false;shot_queued=false;weapon=index;draw_left=.28;shot_cooldown=.28;scoped=false;rescope_after_shot=false
+	reload_left=0;reload_queued=false;shot_queued=false;weapon=index;scoped=false;rescope_after_shot=false;view_anim_lock=0;view_anim_state=""
+	var draw_duration=minf(animation_length(index,"draw",.28),.65) if viewmodel_is_authored(index) else .28
+	draw_left=draw_duration;shot_cooldown=draw_duration
 	for i in 4:models[i].visible=i==weapon
+	if viewmodel_is_authored(index):play_view_animation("draw",true,maxf(animation_length(index,"draw",draw_duration)/maxf(draw_duration,.01),1.))
 	game.sound.local("equip",-20)
 
 func request_reload():
 	if utility_left>0 or reload_left>0 or ammo[weapon]==capacities[weapon] or reserve[weapon]<=0:return
-	scoped=false;rescope_after_shot=false;reload_duration=W.DATA[weapon].reload;reload_left=reload_duration
+	scoped=false;rescope_after_shot=false
+	reload_duration=animation_length(weapon,"reload",W.DATA[weapon].reload) if viewmodel_is_authored(weapon) else W.DATA[weapon].reload
+	reload_left=reload_duration
+	if viewmodel_is_authored(weapon):play_view_animation("reload",true,1.)
 	reload_audio=game.sound.local("pistol_reload" if weapon==1 else "rifle_reload",-11)
+
+func update_spectator():
+	var allies=game.team_alive(team)
+	if allies.is_empty():return
+	var ally=allies[spectator_index%allies.size()]
+	var eye=ally.global_position+Vector3.UP*1.62
+	camera.global_position=eye
+	# Bots expose their current tactical target through last_known. Following it
+	# fixes the old body-yaw-only spectator camera, which looked straight ahead
+	# while the viewed teammate was aiming up/down at an opponent.
+	if ally.visible_target or ally.memory>0:
+		var target=ally.last_known+Vector3.UP*1.05
+		if eye.distance_to(target)>.2:camera.look_at(target,Vector3.UP)
+	else:
+		camera.global_basis=ally.global_basis
 
 func _physics_process(dt):
 	if not game.active:return
 	if hp<=0:
-		var allies=game.team_alive(team)
-		if not allies.is_empty():
-			var ally=allies[spectator_index%allies.size()];camera.global_transform=Transform3D(ally.global_basis,ally.global_position+Vector3.UP*1.62)
-		return
+		update_spectator();return
 	protection=maxf(0,protection-dt);shot_cooldown=maxf(0,shot_cooldown-dt);update_utility(dt)
 	if rescope_after_shot and shot_cooldown==0:scoped=true;rescope_after_shot=false
 	if reload_left>0:
@@ -223,6 +282,7 @@ func fire():
 			if hit.collider.team!=team:hit.collider.take_damage(damage,head,self);game.hit_marker=.16
 		else:game.impact(target,hit.normal)
 	game.tracer(muzzle,target,Color(1,.74,.30));game.noise(global_position,42.,self);game.sound.local(W.DATA[weapon].sound,-5 if weapon!=3 else -4)
+	if viewmodel_is_authored(weapon):play_view_animation("fire",true,1.8)
 	recoil=minf(recoil+.19,1.5);pitch=clampf(pitch+W.DATA[weapon].kick,-1.48,1.48)
 	if weapon==3:rescope_after_shot=scoped;scoped=false
 	flash_time=.045;kick_velocity+=Vector3(.55 if weapon!=3 else 1.0,randf_range(-.10,.10),1.8 if weapon!=3 else 3.1)
@@ -230,24 +290,34 @@ func fire():
 func update_view(dt: float,speed: float):
 	recoil=move_toward(recoil,0,dt*2.5);sway=sway.lerp(Vector2.ZERO,minf(1,dt*10));sway=sway.limit_length(.035);camera.rotation.x=pitch
 	camera.fov=25 if scoped and weapon==3 else 80;weapon_anchor.visible=hp>0 and not (scoped and weapon==3)
-	var base=Vector3(.24,-.24,-.47) if weapon!=1 else Vector3(.20,-.16,-.45);var pose=Vector3(.025,.07,-.015)
+	var authored=viewmodel_is_authored(weapon)
+	var base=Vector3(0,-.119,0) if authored else (Vector3(.24,-.24,-.47) if weapon!=1 else Vector3(.20,-.16,-.45))
+	var pose=Vector3.ZERO if authored else Vector3(.025,.07,-.015)
 	breathing+=dt;motion_blend=lerpf(motion_blend,minf(speed/3.,1.),1-exp(-dt*9));kick_velocity+=(-kick_position*190.-kick_velocity*23.)*dt;kick_position+=kick_velocity*dt
-	base+=Vector3(0,sin(breathing*1.7)*.0025,kick_position.z);pose+=Vector3(kick_position.x,kick_position.y,0);draw_left=maxf(0,draw_left-dt);var draw=draw_left/.28;base.y-=draw*draw*.22;pose.x-=draw*.20
-	base+=Vector3(sin(bob*.5)*.006,absf(cos(bob))*.009,0)*motion_blend;base+=Vector3(-sway.x,sway.y,recoil*.035);pose+=Vector3(recoil*.025,-sway.x,-sway.x*.5)
-	for i in 4:
-		if magazines[i]:magazines[i].position=magazine_base[i];magazines[i].visible=true
-		if hands[i]:hands[i].position=hand_base[i]
-		if bolts[i]:bolts[i].position=bolt_base[i]
-	if reload_left>0:
-		var t=1-reload_left/reload_duration;var dip=smoothstep(0.,.15,t)*(1-smoothstep(.82,1.,t));base+=Vector3(-.10,.045,.04)*dip;pose.z-=dip*.43;pose.y-=dip*.12;pose.x+=dip*.04
-		var reach=smoothstep(.10,.27,t)*(1-smoothstep(.76,.96,t));var extract=smoothstep(.27,.44,t)*(1-smoothstep(.52,.74,t));var grip_shift=Vector3(.015,-.15 if weapon!=1 else -.085,[.34,.03,.27,.34][weapon]);var mag_shift=Vector3(-.07,-.40,.10)*extract
-		if magazines[weapon]:magazines[weapon].position=magazine_base[weapon]+mag_shift;magazines[weapon].visible=not (t>.44 and t<.52)
-		if hands[weapon]:hands[weapon].position=hand_base[weapon]+grip_shift*reach+mag_shift
-		if bolts[weapon] and t>.80:bolts[weapon].position=bolt_base[weapon]+Vector3(0,0,sin(clampf((t-.80)/.14,0,1)*PI)*.065)
-	if weapon==3 and shot_cooldown>0 and reload_left<=0:
-		var cycle=1-shot_cooldown/W.DATA[3].interval;var pull=sin(clampf((cycle-.14)/.62,0,1)*PI)
-		if bolts[3]:bolts[3].position=bolt_base[3]+Vector3(0,0,pull*.14)
-		pose.z+=pull*.10;base.y-=pull*.035
+	if authored:
+		view_anim_lock=maxf(0,view_anim_lock-dt)
+		base+=Vector3(-sway.x*.28,sway.y*.24,kick_position.z*.35+recoil*.010)
+		pose+=Vector3(kick_position.x*.35,kick_position.y*.35,-sway.x*.16)
+		if utility_left<=0 and reload_left<=0 and view_anim_lock<=0:
+			var locomotion="run" if speed>3.1 else ("walk" if speed>.35 else "idle")
+			if locomotion!=view_anim_state:play_view_animation(locomotion,false,1.)
+	else:
+		base+=Vector3(0,sin(breathing*1.7)*.0025,kick_position.z);pose+=Vector3(kick_position.x,kick_position.y,0);draw_left=maxf(0,draw_left-dt);var draw=draw_left/.28;base.y-=draw*draw*.22;pose.x-=draw*.20
+		base+=Vector3(sin(bob*.5)*.006,absf(cos(bob))*.009,0)*motion_blend;base+=Vector3(-sway.x,sway.y,recoil*.035);pose+=Vector3(recoil*.025,-sway.x,-sway.x*.5)
+		for i in 4:
+			if magazines[i]:magazines[i].position=magazine_base[i];magazines[i].visible=true
+			if hands[i]:hands[i].position=hand_base[i]
+			if bolts[i]:bolts[i].position=bolt_base[i]
+		if reload_left>0:
+			var t=1-reload_left/reload_duration;var dip=smoothstep(0.,.15,t)*(1-smoothstep(.82,1.,t));base+=Vector3(-.10,.045,.04)*dip;pose.z-=dip*.43;pose.y-=dip*.12;pose.x+=dip*.04
+			var reach=smoothstep(.10,.27,t)*(1-smoothstep(.76,.96,t));var extract=smoothstep(.27,.44,t)*(1-smoothstep(.52,.74,t));var grip_shift=Vector3(.015,-.15 if weapon!=1 else -.085,[.34,.03,.27,.34][weapon]);var mag_shift=Vector3(-.07,-.40,.10)*extract
+			if magazines[weapon]:magazines[weapon].position=magazine_base[weapon]+mag_shift;magazines[weapon].visible=not (t>.44 and t<.52)
+			if hands[weapon]:hands[weapon].position=hand_base[weapon]+grip_shift*reach+mag_shift
+			if bolts[weapon] and t>.80:bolts[weapon].position=bolt_base[weapon]+Vector3(0,0,sin(clampf((t-.80)/.14,0,1)*PI)*.065)
+		if weapon==3 and shot_cooldown>0 and reload_left<=0:
+			var cycle=1-shot_cooldown/W.DATA[3].interval;var pull=sin(clampf((cycle-.14)/.62,0,1)*PI)
+			if bolts[3]:bolts[3].position=bolt_base[3]+Vector3(0,0,pull*.14)
+			pose.z+=pull*.10;base.y-=pull*.035
 	weapon_anchor.position=base;weapon_anchor.rotation=pose;flash_time=maxf(0,flash_time-dt);flash.light_energy=2.8 if flash_time>0 else 0.
 
 func take_damage(amount: int,head=false,source=null):
@@ -256,4 +326,4 @@ func take_damage(amount: int,head=false,source=null):
 	var absorbed=mini(armor,roundi(amount*.35));armor-=absorbed;hp=maxi(0,hp-amount+absorbed);game.hurt_overlay=.55
 	if hp==0:
 		if is_instance_valid(reload_audio):reload_audio.stop()
-		reload_left=0;utility_left=0;scoped=false;camera.fov=80;weapon_anchor.visible=false;velocity=Vector3.ZERO;collision_layer=0;collision_mask=0;game.actor_died(self,source,head)
+		reload_left=0;utility_left=0;view_anim_lock=0;scoped=false;camera.fov=80;weapon_anchor.visible=false;velocity=Vector3.ZERO;collision_layer=0;collision_mask=0;game.actor_died(self,source,head)
