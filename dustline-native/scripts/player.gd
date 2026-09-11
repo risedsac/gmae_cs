@@ -184,7 +184,10 @@ func cancel_reload():
 
 func clear_spectator_target():
 	if is_instance_valid(spectator_target):
-		if is_instance_valid(spectator_target.model):spectator_target.model.visible=spectator_target.hp>0
+		# The body stays visible when the target dies so its third-person death pose
+		# is restored as soon as the spectator camera leaves it. The gun follows the
+		# bot's normal alive/dead visibility rule.
+		if is_instance_valid(spectator_target.model):spectator_target.model.visible=true
 		if is_instance_valid(spectator_target.gun):spectator_target.gun.visible=spectator_target.hp>0
 		if is_instance_valid(spectator_target.friendly_label):spectator_target.friendly_label.visible=spectator_target.hp>0 and spectator_target.team==game.player_team
 	if spectator_reload_weapon>=0:reset_weapon_rig(spectator_reload_weapon)
@@ -246,9 +249,9 @@ func cycle_owned_weapon(direction: int):
 	if order.size()<2:return
 	var current=order.find(weapon)
 	if current<0:current=0
-	var next=(current+direction)%order.size()
-	if next<0:next+=order.size()
-	switch_weapon(order[next])
+	var next_index=(current+direction)%order.size()
+	if next_index<0:next_index+=order.size()
+	switch_weapon(order[next_index])
 
 func begin_utility(kind: String):
 	if utility_left>0 or reload_left>0 or hp<=0 or grenades.get(kind,0)<=0 or game.phase not in ["live","planted"]:return
