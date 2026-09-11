@@ -39,7 +39,19 @@ check_sha256() {
 fetch_exact "$STEEL/assets/models/steel_tide_reloadable_weapons/p226_reloadable.glb" "$REAL_ROOT/fallback/p226_reloadable.glb"
 fetch_exact "$STEEL/assets/models/steel_tide_reloadable_weapons/awm_reloadable.glb" "$REAL_ROOT/fallback/awm_reloadable.glb"
 fetch_exact "$STEEL/assets/models/steel_tide_m4a1/steel_tide_m4a1.glb" "$REAL_ROOT/m4a1/steel_tide_m4a1.glb"
-for file in smg45_rifle_arms.glb smg45_pistol_service_arms.glb animated_reload_arms.glb; do
+for file in \
+  smg45_rifle_arms.glb \
+  smg45_rifle_arms_Image_0.png \
+  smg45_rifle_arms_Image_1.png \
+  smg45_rifle_arms_Image_2.png \
+  smg45_pistol_service_arms.glb \
+  smg45_pistol_service_arms_Image_0.png \
+  smg45_pistol_service_arms_Image_1.png \
+  smg45_pistol_service_arms_Image_2.png \
+  animated_reload_arms.glb \
+  animated_reload_arms_Image_0.png \
+  animated_reload_arms_Image_1.png \
+  animated_reload_arms_Image_2.png; do
   fetch_exact "$STEEL/assets/models/djmaesen_smg45/$file" "$ARMS_ROOT/$file"
 done
 
